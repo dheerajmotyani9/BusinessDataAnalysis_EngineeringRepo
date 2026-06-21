@@ -1,0 +1,307 @@
+package mapitgis.jalnigam.nirmal.repository
+
+import android.content.Context
+import android.location.Location
+import android.net.Uri
+import android.util.Log
+import androidx.lifecycle.LiveData
+import com.google.gson.Gson
+import com.google.gson.JsonObject
+import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import mapitgis.jalnigam.BuildConfig
+import mapitgis.jalnigam.core.Login
+import mapitgis.jalnigam.core.Module
+import mapitgis.jalnigam.core.SqLite
+import mapitgis.jalnigam.core.Utility
+import mapitgis.jalnigam.network.ApiClient
+import mapitgis.jalnigam.network.ApiInterface
+import mapitgis.jalnigam.nirmal.collection.SessionManager
+import mapitgis.jalnigam.nirmal.collection.WaterPointType
+import mapitgis.jalnigam.nirmal.database.NirmalDb
+import mapitgis.jalnigam.nirmal.database.dao.CombineSurveyTransaction
+import mapitgis.jalnigam.nirmal.database.dao.NimalWQMDao
+import mapitgis.jalnigam.nirmal.database.dao.NirmalAssignedSurveyDao
+import mapitgis.jalnigam.nirmal.database.dao.NirmalDistBlockVillageDao
+import mapitgis.jalnigam.nirmal.database.dao.NirmalSurveyTransDao
+import mapitgis.jalnigam.nirmal.database.dao.VillageDetails
+import mapitgis.jalnigam.nirmal.database.dao.VillageDetailsWithCount
+import mapitgis.jalnigam.nirmal.database.table.NirmalAssignedSurvey
+import mapitgis.jalnigam.nirmal.database.table.NirmalDistBlockVillage
+import mapitgis.jalnigam.nirmal.database.table.NirmalWQMEntity
+import mapitgis.jalnigam.nirmal.util.BitmapUtil
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+class NirmalRepository(val context: Context) {
+
+    private var wqmDao: NimalWQMDao
+    private var distBlockVillageDao: NirmalDistBlockVillageDao
+    private var nirmalAssignedSurveyDao: NirmalAssignedSurveyDao
+    private var nirmalSurveyTransDao: NirmalSurveyTransDao
+    private var apiInterface: ApiInterface
+    private var sqLite = SqLite.instance(context)
+    var login: Login = sqLite.login
+    var isContractor = login.roleId == 10
+
+    private val dateFormat = SimpleDateFormat("dd-MM-yyyy hh:mm a", Locale.getDefault())
+
+    init {
+        val db = NirmalDb.getInstance(context)
+        wqmDao = db.wqmDao()
+        distBlockVillageDao = db.nirmalDistBlockDao()
+        nirmalAssignedSurveyDao = db.nirmalAssignedSurveyDao()
+        nirmalSurveyTransDao = db.nirmalSurveyTransDao()
+        apiInterface = ApiClient.getClient(context).create(ApiInterface::class.java)
+    }
+
+
+    fun generateWaterSampleId():String{
+        val sdf = SimpleDateFormat("ddMMyyHHmmss", Locale.getDefault())
+        val formattedDate = sdf.format(Date())
+        return "WS${login.id}${formattedDate}"
+    }
+
+
+
+    // Insert Data
+    suspend fun insertWQM(nirmalSurvey: NirmalWQMEntity) {
+        withContext(Dispatchers.IO) { // Run in background thread
+            wqmDao.insertWQM(nirmalSurvey.copy(userId = login.id.toInt()))
+        }
+    }
+
+    fun getAllBeneficiary(surveyId: String,villageId:String,status:Int): LiveData<List<NirmalWQMEntity>> {
+        return wqmDao.getAllWQM(surveyId,WaterPointType.BENEFICIARY.id,villageId,status)
+    }
+
+    suspend fun deleteWQMById(id: Int) {
+        withContext(Dispatchers.IO) {
+            wqmDao.deleteWQMById(id)
+        }
+    }
+
+    suspend fun uploadWQMForm(nirmalWQMEntity: NirmalWQMEntity, location: Location): Pair<Boolean, String> {
+        return withContext(Dispatchers.IO) {
+            val bitmap = BitmapUtil.uriToBitmap(context = context, imageUri = Uri.parse(nirmalWQMEntity.sampleImgFilePath ?: ""))
+            try {
+                val map = HashMap<String, Any>().apply {
+                    put(Utility.E_TOKEN, login.token)
+                    put("role_id", login.roleId)
+                    put("mapping_id", nirmalWQMEntity.assignedSurveyId)
+                    put("sampleid", nirmalWQMEntity.sampleId)
+                    put("allotment_type", nirmalWQMEntity.collectionId)
+                    put("scheme_id", nirmalWQMEntity.schemeId ?: 0)
+                    put("allotment_dt", nirmalWQMEntity.assignDate)
+
+                    put("vill_cd", nirmalWQMEntity.villageId ?: 0)
+                    put("oht_id", nirmalWQMEntity.ohtId ?: 0)
+
+                    // ✅ Convert Image to Base64
+                    bitmap?.let {
+                        val bitmapString = BitmapUtil.encodeImageToBase64(it)
+                        put("sample_photo_Base64", bitmapString)
+                    }
+
+                    if (nirmalWQMEntity.collectionId != WaterPointType.WTP_INLET.id) {
+                        val frcBitmap = BitmapUtil.uriToBitmap(context, Uri.parse(nirmalWQMEntity.frcImgFilePath ?: ""))
+                        frcBitmap?.let {
+                            val bitmapString = BitmapUtil.encodeImageToBase64(it)
+                            put("frc_test_photo_Base64", bitmapString)
+                        }
+                    }
+
+                    if (nirmalWQMEntity.collectionId == WaterPointType.BULK_METER.id) {
+                        put("contact_person", nirmalWQMEntity.contactPersonName ?: "")
+                        put("contact_person_mobno", nirmalWQMEntity.contactPersonMobile ?: "")
+                    } else if (nirmalWQMEntity.collectionId == WaterPointType.BENEFICIARY.id) {
+                        put("contact_person", nirmalWQMEntity.beneficiaryName ?: "")
+                        put("contact_person_mobno", nirmalWQMEntity.beneficiaryMobile ?: "")
+                    }
+
+                    put("frc_test_result", nirmalWQMEntity.frcTestResult ?: "")
+                    put("remark", nirmalWQMEntity.remark ?: "")
+                    put("designation", nirmalWQMEntity.contactPersonDesignation ?: "")
+                    put("samagra_id", nirmalWQMEntity.beneficiarySamagraId ?: "")
+                    put("mapping_id", nirmalWQMEntity.assignedSurveyId)
+                    put("latitude", nirmalWQMEntity.latitude)
+                    put("longitude", nirmalWQMEntity.longitude)
+                    put("accuracy", "${nirmalWQMEntity.accuracy}")
+                    put("asset_latitude",location.latitude)
+                    put("asset_longitude",location.longitude)
+                    put("device_date", dateFormat.format(nirmalWQMEntity.createdAt))
+                }
+                //--------------------check photo validation--------------------//
+                val isInvalidPhoto = map["sample_photo_Base64"]?.toString().isNullOrBlank()
+                if (isInvalidPhoto) {
+                    return@withContext Pair(false,"Invalid sample photo")
+                }
+
+                if (nirmalWQMEntity.collectionId != WaterPointType.WTP_INLET.id) {
+                    val isInvalidFRCPhoto = map["frc_test_photo_Base64"]?.toString().isNullOrBlank()
+                    if (isInvalidFRCPhoto) {
+                        return@withContext Pair(false,"Invalid FRC photo")
+                    }
+                }
+                //-------------------------------------------------------------//
+                val json = Gson().toJson(map)
+                println(json)
+
+                val response = apiInterface.insertNirmalModule(map).execute()
+                if (response.isSuccessful && response.body() != null) {
+                    if (response.body()?.Success == true) {
+                        updateWQMStatus(nirmalWQMEntity.id)
+                        response.body()?.Data?.let { jsonObject ->
+                            //update file path
+                            val sampleFilePath = getStringSafely(jsonObject,"SamplePhotoPath")
+                            sampleFilePath?.let {
+                                BitmapUtil.deleteImage(context,nirmalWQMEntity.sampleImgFilePath)
+                                updateSampleFilePath(nirmalWQMEntity.id,sampleFilePath)
+                            }
+
+                            val frcFilePath = getStringSafely(jsonObject,"FrcTestPhotoPath")
+                            frcFilePath?.let {
+                                BitmapUtil.deleteImage(context,nirmalWQMEntity.frcImgFilePath)
+                                updateFRCFilePath(nirmalWQMEntity.id,frcFilePath)
+                            }
+                        }
+                    }
+                }
+                return@withContext Pair(response.body()?.Success?: false,response.body()?.Message ?: "Something went wrong")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return@withContext Pair(false,"Something went wrong")
+            }
+        }
+    }
+
+
+
+    fun syncNirmalModuleAsync(module: Module,callback: (Boolean, String) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val map = HashMap<String,String>().apply {
+                put(Utility.E_TOKEN,login.token)
+            }
+            try {
+                val response = apiInterface.syncNirmalModule(map).execute()
+                if (response.isSuccessful && response.body() != null) {
+                    if(response.body()!!.Success){
+                        val data = response.body()!!.Data as JsonObject
+                        val type = object : TypeToken<List<NirmalDistBlockVillage>>() {}.type
+                        val listDBV = Gson().fromJson<List<NirmalDistBlockVillage>>(data.getAsJsonArray("Ohsr_Oht_Vill"), type)
+                        saveDistBlockVillage(listDBV)
+
+                        val type1 = object : TypeToken<List<NirmalAssignedSurvey>>() {}.type
+                        val listNirmalSurvey = Gson().fromJson<List<NirmalAssignedSurvey>>(data.getAsJsonArray("Assigne_User_Nirmal_Survey"), type1)
+                        saveNirmalSurvey(copyLatLngFromWTPToIntakeWell(listNirmalSurvey))
+                        sqLite.updateLastTime(module)
+                    }
+                }
+                withContext(Dispatchers.Main) {
+                    callback(response.body()?.Success?:false,response.body()?.Message?:"Something went wrong") // Pass result to callback
+                }
+            }catch (ex:Exception){
+                ex.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    callback(false,"Something went wrong") // Pass result to callback
+                }
+            }
+        }
+    }
+
+
+
+    suspend fun saveDistBlockVillage(list: List<NirmalDistBlockVillage>) {
+        withContext(Dispatchers.IO){
+            distBlockVillageDao.clearTable()
+            distBlockVillageDao.insertAll(list)
+        }
+    }
+
+    suspend fun saveNirmalSurvey(list: List<NirmalAssignedSurvey>) {
+        withContext(Dispatchers.IO){
+            nirmalAssignedSurveyDao.clearTable()
+            nirmalAssignedSurveyDao.insertAllSurveys(list)
+        }
+    }
+
+    suspend fun updateWQMStatus(id: Int) {
+        withContext(Dispatchers.IO){
+            wqmDao.updateUploadedStatus(id)
+        }
+    }
+
+    suspend fun updateSampleFilePath(id: Int,filePath:String) {
+        withContext(Dispatchers.IO){
+            val networkImgPath = "${BuildConfig.JAL_NIGAM_IMAGE}$filePath"
+            Log.v("IMG PATH",networkImgPath)
+            wqmDao.updateSampleFilePath(id,networkImgPath)
+        }
+    }
+
+    suspend fun updateFRCFilePath(id: Int,filePath:String) {
+        withContext(Dispatchers.IO){
+            val networkImgPath = "${BuildConfig.JAL_NIGAM_IMAGE}$filePath"
+            Log.v("IMG PATH",networkImgPath)
+            wqmDao.updateFRCFilePath(id,networkImgPath)
+        }
+    }
+
+
+
+    suspend fun getEsrVillageDetails(esrCode:String): List<VillageDetails> = withContext(Dispatchers.IO) {
+        distBlockVillageDao.getDistinctVillageDetails(esrCode)
+    }
+
+    fun getEsrVillageWithBeneficiaryCount(esrCode:String,surveyId: String,status:Int): LiveData<List<VillageDetailsWithCount>>{
+        return distBlockVillageDao.getVillageDetailsWithCount(esrCode,surveyId,status)
+    }
+
+
+
+    fun combineSurveyTrans(filter : List<Int>,formattedDate: String): LiveData<List<CombineSurveyTransaction>>{
+        //val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        //val formattedDate = dateFormat.format(Date()) //current date
+        if(filter.isEmpty()){
+            return nirmalSurveyTransDao.getCombinedSurveyTransactions(formattedDate,WaterPointType.BENEFICIARY.id,"${login.id}")
+        }else{
+            return nirmalSurveyTransDao.getCombinedSurveyTransactionsFilter(formattedDate,WaterPointType.BENEFICIARY.id,"${login.id}",filter)
+        }
+    }
+
+
+    private fun getStringSafely(jsonObject: JsonObject, key: String): String? {
+        return if (jsonObject.has(key) && !jsonObject.get(key).isJsonNull && jsonObject.get(key).asString.isNotBlank()) {
+            jsonObject.get(key).asString
+        } else {
+            null
+        }
+    }
+
+
+    /*for Intake well- updating wtp lat lng for WTP inlet survey*/
+    private fun copyLatLngFromWTPToIntakeWell(surveys: List<NirmalAssignedSurvey>): List<NirmalAssignedSurvey> {
+        val wtpMap = surveys
+            .filter { it.allotmentType.toInt() == WaterPointType.WTP_OUTLET.id}
+            .associateBy { it.id }
+
+        return surveys.map { item ->
+            if (item.allotmentType.toInt() == WaterPointType.WTP_INLET.id) {
+                val type2Match = wtpMap[item.id]
+                if (type2Match != null) {
+                    item.copy(
+                        assetLatitude = type2Match.assetLatitude,
+                        assetLongitude = type2Match.assetLongitude
+                    )
+                } else item
+            } else item
+        }
+    }
+}
+
+
+

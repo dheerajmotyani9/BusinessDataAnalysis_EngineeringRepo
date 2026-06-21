@@ -1,0 +1,21 @@
+package mapitgis.jalnigamk.nirmal.screens.contractor
+
+import android.app.Application
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import mapitgis.jalnigamk.nirmal.base.NirmalBaseViewModel
+import mapitgis.jalnigamk.nirmal.collection.WaterPointType
+
+
+class NirmalContractorVM (application: Application) : NirmalBaseViewModel(application){
+
+    private val _selectedComponent = MutableLiveData<WaterPointType?>()
+    val component: LiveData<WaterPointType?> get() = _selectedComponent
+
+    fun setSelectedComponent(component: WaterPointType?){
+        _selectedComponent.value = component
+    }
+
+
+
+}

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="wqm"
+            type="mapitgis.jalnigam.nirmal.database.table.NirmalWQMEntity" />
+
+        <variable
+            name="viewModel"
+            type="mapitgis.jalnigam.nirmal.screens.beneficiary.BeneficiaryListVM" />
+
+
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="4dp"
+        app:cardUseCompatPadding="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+
+
+            <com.app.viewcomponent.FormKeyValueText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:key="Beneficiary"
+                app:value="@{wqm.beneficiaryName}"/>
+
+            <com.app.viewcomponent.FormKeyValueText
+                android:id="@+id/tv_activate_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:key="Village"
+                app:value="@{wqm.villageName}" />
+
+            <include
+                android:id="@+id/item_transaction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/item_nirmal_transaction"
+                bind:transaction="@{wqm}"/>
+
+
+
+        </LinearLayout>
+
+
+    </androidx.cardview.widget.CardView>
+</layout>

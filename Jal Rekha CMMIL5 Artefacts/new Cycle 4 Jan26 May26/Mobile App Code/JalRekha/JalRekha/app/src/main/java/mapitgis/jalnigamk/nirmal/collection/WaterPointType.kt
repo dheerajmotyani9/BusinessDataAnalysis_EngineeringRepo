@@ -1,0 +1,25 @@
+package mapitgis.jalnigamk.nirmal.collection
+
+enum class WaterPointType(val id:Int,val value: String) {
+
+    WTP_INLET(1,"WTP Inlet (Raw water)"), //Intake Well
+    WTP_OUTLET(2,"WTP Outlet (Clear water)"),
+    OHT_ESR(3,"OHT"),
+    BULK_METER(4,"Bulk Water Meter"),
+    BENEFICIARY(5,"Beneficiary");
+
+    companion object{
+        fun fromString(value: String): WaterPointType? {
+            return entries.find { it.value == value }
+        }
+
+        fun fromId(id: Int): WaterPointType? {
+            return entries.find { it.id == id }
+        }
+
+        fun getValue(id: Int): String? {
+            return entries.find { it.id == id }?.value
+        }
+    }
+}
+

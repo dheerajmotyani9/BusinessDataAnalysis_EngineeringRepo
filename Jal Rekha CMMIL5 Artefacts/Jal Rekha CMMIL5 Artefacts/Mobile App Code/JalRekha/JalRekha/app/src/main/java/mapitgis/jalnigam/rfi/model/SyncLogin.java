@@ -1,0 +1,314 @@
+package mapitgis.jalnigam.rfi.model;
+
+import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
+
+import mapitgis.jalnigam.room.table.PipeLineTable;
+import mapitgis.jalnigam.room.table.SopanOHT;
+
+public class SyncLogin {
+
+    @SerializedName("Message")
+    private String message;
+    @SerializedName("Success")
+    private boolean success;
+    @SerializedName("Data")
+    private SyncLoginData data;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public SyncLoginData getData() {
+        return data;
+    }
+
+    public static class SyncLoginData {
+
+        @SerializedName("Component")
+        private List<SyncComponent> componentList;
+        @SerializedName("ApplicationType")
+        private List<SyncApplicationType> applicationTypeList;
+        @SerializedName("Point")
+        private List<SyncPoint> pointList;
+        @SerializedName("LocatonMaster")
+        private List<SyncLocation> locationList;
+        @SerializedName("qa_qc_review")
+        private List<SyncQaQcReview> qaQcReviewList;
+        @SerializedName("Status_master")
+        private List<SyncStatus> statusList;
+        @SerializedName("Stages")
+        private List<SyncStages> stagesList;
+
+        @SerializedName("PipelineMaster")
+        private List<PipeLineTable> pipelineMaster;
+
+        @SerializedName("GetSopan_OHT")
+        private List<SopanOHT> sopanOhtMaster;
+
+        public List<SopanOHT> getSopanOhtMaster() {
+            return sopanOhtMaster;
+        }
+
+        public List<SyncComponent> getComponentList() {
+            return componentList;
+        }
+
+        public List<PipeLineTable> getPipeLineList() {
+            return pipelineMaster;
+        }
+
+        public List<SyncApplicationType> getApplicationTypeList() {
+            return applicationTypeList;
+        }
+
+        public List<SyncPoint> getPointList() {
+            return pointList;
+        }
+
+        public List<SyncLocation> getLocationList() {
+            return locationList;
+        }
+
+        public List<SyncQaQcReview> getQaQcReviewList() {
+            return qaQcReviewList;
+        }
+
+        public List<SyncStatus> getStatusList() {
+            return statusList;
+        }
+
+        public List<SyncStages> getStagesList() {
+            return stagesList;
+        }
+
+        public static class SyncApplicationType {
+            @SerializedName("application_type_id")
+            private String applicationId;
+            @SerializedName("application_type_nm")
+            private String applicationName;
+
+            public String getApplicationId() {
+                return applicationId;
+            }
+
+            public String getApplicationName() {
+                return applicationName;
+            }
+        }
+
+        public static class SyncComponent {
+            @SerializedName("component_id")
+            private String componentId;
+            @SerializedName("component_name")
+            private String componentName;
+            @SerializedName("component_type")
+            private String componentType;
+            @SerializedName("component_type_nm")
+            private String componentTypeName;
+
+            public String getComponentId() {
+                return componentId;
+            }
+
+            public String getComponentName() {
+                return componentName;
+            }
+
+            public String getComponentType() {
+                return componentType;
+            }
+
+            public String getComponentTypeName() {
+                return componentTypeName;
+            }
+        }
+
+        public static class SyncPoint {
+            private int cid;
+            private int gid;
+            private String lat;
+            private String lng;
+            private String name;
+            @SerializedName("scheme_id")
+            private String schemeId;
+            @SerializedName("vill_lgdcd")
+            private String villageId;
+            @SerializedName("vill_nm")
+            private String villageName;
+
+            public int getCid() {
+                return cid;
+            }
+
+            public int getGid() {
+                return gid;
+            }
+
+            public String getLat() {
+                return lat;
+            }
+
+            public String getLng() {
+                return lng;
+            }
+
+            public String getName() {
+                return name;
+            }
+
+            public String getSchemeId() {
+                return schemeId;
+            }
+
+            public String getVillageId() {
+                return villageId;
+            }
+
+            public String getVillageName() {
+                return villageName;
+            }
+        }
+
+        public static class SyncLocation {
+            @SerializedName("b_cd")
+            private String blockId;
+            @SerializedName("b_nm_e")
+            private String blockName;
+            @SerializedName("dist_nm_e")
+            private String districtName;
+            @SerializedName("dist_cd")
+            private String districtId;
+            @SerializedName("lgd_gp_cd")
+            private String gramPId;
+            @SerializedName("lgd_gp_nm_e")
+            private String gramPName;
+            @SerializedName("scheme_id")
+            private String schemeId;
+            @SerializedName("scheme_name")
+            private String schemeName;
+            @SerializedName("vil_nm_e")
+            private String villageName;
+            @SerializedName("vill_cd")
+            private String villageId;
+
+            public String getBlockId() {
+                return blockId;
+            }
+
+            public String getBlockName() {
+                return blockName;
+            }
+
+            public String getDistrictName() {
+                return districtName;
+            }
+
+            public String getDistrictId() {
+                return districtId;
+            }
+
+            public String getGramPId() {
+                return gramPId;
+            }
+
+            public String getGramPName() {
+                return gramPName;
+            }
+
+            public String getSchemeId() {
+                return schemeId;
+            }
+
+            public String getSchemeName() {
+                return schemeName;
+            }
+
+            public String getVillageName() {
+                return villageName;
+            }
+
+            public String getVillageId() {
+                return villageId;
+            }
+        }
+
+        public static class SyncQaQcReview{
+            @SerializedName("qa_qc_review")
+            private String qaQcReview;
+            @SerializedName("qa_qc_review_type_id")
+            private String qaQcReviewTypeId;
+            @SerializedName("sequence_no")
+            private int sequenceNo;
+
+            public String getQaQcReview() {
+                return qaQcReview;
+            }
+
+            public String getQaQcReviewTypeId() {
+                return qaQcReviewTypeId;
+            }
+
+            public int getSequenceNo() {
+                return sequenceNo;
+            }
+        }
+
+        public static class SyncStages{
+            @SerializedName("component_line_stage_id")
+            private String id;
+            @SerializedName("component_line_stage_name")
+            private String name;
+
+            public String getId() {
+                return id;
+            }
+
+            public String getName() {
+                return name;
+            }
+        }
+
+        /*
+        {
+                "status_group": 1,
+                "status_group_name": "RFI",
+                "status_id": 1,
+                "status_name": "RFI Request"
+            },
+         */
+
+        public static class SyncStatus{
+            @SerializedName("status_group")
+            private int statusGrp;
+            @SerializedName("status_group_name")
+            private String statusGrpName;
+            @SerializedName("status_id")
+            private int statusId;
+            @SerializedName("status_name")
+            private String statusName;
+
+            public int getStatusGrp() {
+                return statusGrp;
+            }
+
+            public String getStatusGrpName() {
+                return statusGrpName;
+            }
+
+            public int getStatusId() {
+                return statusId;
+            }
+
+            public String getStatusName() {
+                return statusName;
+            }
+        }
+    }
+
+}

@@ -1,0 +1,1670 @@
+package mapitgis.jalnigam.core;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.google.android.gms.maps.model.LatLng;
+
+import org.json.JSONArray;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import mapitgis.jalnigam.Asset;
+import mapitgis.jalnigam.LayerInfo;
+import mapitgis.jalnigam.dhara1.DharaComponent;
+import mapitgis.jalnigam.dhara1.ESRVillage;
+import mapitgis.jalnigam.dhara1.Reading;
+import mapitgis.jalnigam.di.DI;
+import mapitgis.jalnigam.isa.ISA;
+import mapitgis.jalnigam.isa.IsaInfo;
+
+public class SqLite extends SQLiteOpenHelper {
+    public static final int INT_ALL = 99;
+    private static SqLite sqLite = null;
+    private static final int Version = 6;
+    //    private static final int Version = 3;
+    private static final String T_LOGIN = "login";
+    private static final String T_SPINNER = "spinner";
+    private static final String T_LAST_SYNC = "last_sync";
+    private static final String T_ASSERT = "assert";
+    private static final String T_DAILY_INSPECTION = "daily_inspection";
+    private static final String T_ISA_ACTIVITY = "isa_activity";
+    private static final String T_PHOTO_NEW = "photo";
+    private static final String T_DHARA = "dhara";
+    private static final String T_DHARA_COMPONENT = "dhara_component";
+
+    private static final String ALL_SERIAL = "serial";
+    private static final String AA_PAST_POINT_ID = "past_serial";
+    private static final String ALL_LINE_JSON = "line_json";
+    private static final String ALL_IMEI = "all_imei";
+    private static final String ALL_SCHEME_ID = "scheme_id";
+    private static final String ALL_SCHEME_NAME = "scheme_name";
+    private static final String ALL_ESR_ID = "esr_id";
+    private static final String ALL_ESR_NAME = "esr_name";
+    private static final String ALL_ESR_SUID = "ALL_ESR_SUID";
+    private static final String ALL_POINT_ID = "point_id";
+    private static final String ALL_POINT_NAME = "point_name";
+    private static final String ALL_COMPONENT_ID = "component_id";
+    private static final String ALL_COMPONENT_NAME = "component_name";
+    private static final String ALL_DEPTH_COVER = "depth_cover";
+    private static final String ALL_DIAMETER = "diameter";
+    private static final String ALL_MATERIAL = "material";
+    private static final String ALL_ALIGNMENT = "alignment";
+    private static final String ALL_MATERIAL_INFO_NAME = "material_info_name";
+    private static final String ALL_MATERIAL_INFO_VALUE = "material_info_value";
+    private static final String ALL_LAT = "lat";
+    private static final String ALL_LNG = "lng";
+    private static final String ALL_ADDRESS = "address";
+    private static final String A_REMARK = "remark";
+    private static final String A_PHOTO = "photo";
+    private static final String AA_DATE = "date";
+
+    private static final String ALL_UPLOADED = "uploaded";
+
+
+    private static final String L_NAME = "name";
+    private static final String L_EMAIL = "email";
+    private static final String L_MOBILE = "mobile";
+    private static final String L_DISTRICT = "district";
+    private static final String L_DESIGNATION = "designation";
+
+    private static final String L_ROLE_ID = "role_id";
+    private static final String L_ROLE = "role";
+    private static final String L_TOKEN = "token";
+    private static final String L_MODULE = "module";
+
+    private static final String L_USER_ID = "user_id";
+
+    private static final String S_KEY = "token";
+    private static final String S_NAME = "name";
+    private static final String S_EXTRA1 = "extra_1";
+    private static final String S_EXTRA2 = "extra_2";
+    private static final String S_EXTRA3 = "extra_3";
+    private static final String S_EXTRA4 = "extra_4";
+    private static final String S_EXTRA5 = "extra_5";
+    private static final String S_EXTRA6 = "extra_6";
+    private static final String S_EXTRA7 = "extra_7";
+    private static final String S_EXTRA8 = "extra_8";
+    private static final String S_EXTRA9 = "extra_9";
+    private static final String S_EXTRA10 = "extra_10";
+    private static final String S_EXTRA11 = "extra_11";
+    private static final String S_EXTRA12 = "extra_12";
+    private static final String S_EXTRA13 = "extra_13";
+    private static final String S_EXTRA14 = "extra_14";
+    private static final String S_EXTRA15 = "extra_15";
+    private static final String S_EXTRA16 = "extra_16";
+    private static final String S_EXTRA17 = "extra_17";
+    private static final String S_EXTRA18 = "extra_18";
+    private static final String S_EXTRA19 = "extra_19";
+    private static final String S_EXTRA20 = "extra_20";
+    private static final String S_SOURCE = "source";
+
+
+    private static final String D_PIU_ID = "D_PIU_ID";
+    private static final String D_PIU_NAME = "D_PIU_NAME";
+    private static final String D_VILLAGE_NAME = "D_VILLAGE_NAME";
+    private static final String D_GP = "D_GP";
+    private static final String D_BLOCK = "D_BLOCK";
+    private static final String D_APP_TYPE_ID = "D_APP_TYPE_ID";
+    private static final String D_APP_TYPE_NAME = "D_APP_TYPE_NAME";
+    private static final String D_DETAIL = "D_DETAIL";
+    private static final String D_REVIEW_ID = "D_REVIEW_ID";
+    private static final String D_REVIEW_NAME = "D_REVIEW_NAME";
+    private static final String D_COMMENT = "D_COMMENT";
+    private static final String D_ADDRESS = "D_ADDRESS";
+
+
+    private static final String N_GP_ID = "N_GP_ID";
+    private static final String N_GP_NAME = "N_GP_NAME";
+    private static final String N_VILLAGE_ID = "N_VILLAGE_ID";
+    private static final String N_VILLAGE_NAME = "N_VILLAGE_NAME";
+    private static final String N_ACTIVITY_ID = "N_ACTIVITY_ID";
+    private static final String N_ACTIVITY_NAME = "N_ACTIVITY_NAME";
+    private static final String N_REMARK = "N_REMARK";
+    private static final String N_DATE_O_A = "N_DATE_O_A";
+    private static final String N_DATE = "N_DATE";
+    private static final String N_IS_OLD = "N_IS_OLD";
+
+    private static final String DH_MAPPING_ID = "DH_MAPPING_ID";
+    private static final String DH_TYPE_ID = "DH_TYPE_ID";
+    private static final String DH_TYPE_NAME = "DH_TYPE_NAME";
+    private static final String DH_MAIN_ID = "DH_MAIN_ID";
+    private static final String DH_LGD = "DH_LGD";
+    private static final String DH_VILLAGE = "DH_VILLAGE";
+    private static final String DH_METER_ID = "DH_METER_ID";
+    private static final String DH_START_READING = "DH_START_READING";
+    private static final String DH_END_READING = "DH_END_READING";
+    private static final String DH_END_REMARK = "DH_END_REMARK";
+    private static final String DH_METER_STATUS_ID = "DH_METER_STATUS_ID";
+    private static final String DH_METER_STATUS_NAME = "DH_METER_STATUS_NAME";
+    private static final String DH_END_LAT = "DH_END_LAT";
+    private static final String DH_END_LNG = "DH_END_LNG";
+    private static final String DH_END_DATE = "DH_END_DATE";
+    private static final String DH_END_TIME = "DH_END_TIME";
+    private static final String DH_TOTAL_WS = "DH_TOTAL_WS";
+
+    private static final String DC_ID = "DC_ID";
+    private static final String DC_NAME = "DC_NAME";
+    private static final String DC_TYPE = "DC_TYPE";
+    private static final String DC_WTP_ID = "DC_WTP_ID";
+    private static final String DC_B_ID = "DC_B_ID";
+    private static final String DC_B_NAME = "DC_B_NAME";
+    private static final String DC_METER_ID = "DC_METER_ID";
+    private static final String DC_METER_NAME = "DC_METER_NAME";
+    private static final String DC_R1 = "DC_R1";
+    private static final String DC_R2 = "DC_R2";
+    private static final String DC_WS = "DC_WS";
+    private static final String DC_REMARK = "DC_REMARK";
+    private static final String DC_PHOTO = "DC_PHOTO";
+    private static final String DC_R1_DATE = "DC_R1_DATE";
+    private static final String DC_DATE = "DC_DATE";
+    private static final String DC_METER_STATUS_ID = "DC_METER_STATUS_ID";
+    private static final String DC_METER_STATUS_NAME = "DC_METER_STATUS_NAME";
+
+    private SQLiteDatabase db;
+
+    public static SqLite instance(@Nullable Context context) {
+        if (sqLite == null) {
+            sqLite = new SqLite(context);
+        }
+        return sqLite;
+    }
+
+    private SqLite(@Nullable Context context) {
+//        super(context, "jal_rekha_app.db", null, Version);
+        super(context, "jal_rekha_sync.db", null, Version);
+        db = getWritableDatabase();
+    }
+
+    @Override
+    public void onCreate(@NonNull SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE " + T_LOGIN + "(" + L_USER_ID + " INTEGER," + L_ROLE_ID + " INTEGER," + L_NAME + " VARCHAR," + L_EMAIL + " VARCHAR," + L_MOBILE + " VARCHAR," + L_DISTRICT + " VARCHAR," + L_DESIGNATION + " VARCHAR," + L_ROLE + " VARCHAR," + L_MODULE + " VARCHAR," + L_TOKEN + " VARCHAR);");///," + L_DID + " VARCHAR
+        db.execSQL("CREATE TABLE " + T_ASSERT + "(" + ALL_IMEI + " VARCHAR," + ALL_SERIAL + " INTEGER PRIMARY KEY AUTOINCREMENT," + AA_PAST_POINT_ID + " VARCHAR," + ALL_LINE_JSON + " VARCHAR," + ALL_SCHEME_ID + " VARCHAR," + ALL_SCHEME_NAME + " VARCHAR," + ALL_ESR_ID + " VARCHAR," + ALL_ESR_NAME + " VARCHAR," + ALL_POINT_ID + " VARCHAR," + ALL_POINT_NAME + " VARCHAR," + ALL_COMPONENT_ID + " VARCHAR," + ALL_COMPONENT_NAME + " VARCHAR," + ALL_LAT + " VARCHAR," + ALL_LNG + " VARCHAR," + A_REMARK + " VARCHAR," + A_PHOTO + " VARCHAR," + AA_DATE + " VARCHAR," + ALL_DEPTH_COVER + " VARCHAR," + ALL_DIAMETER + " VARCHAR," + ALL_MATERIAL + " VARCHAR," + ALL_ALIGNMENT + " VARCHAR," + ALL_MATERIAL_INFO_NAME + " VARCHAR," + ALL_MATERIAL_INFO_VALUE + " VARCHAR," + ALL_UPLOADED + " INTEGER);");
+
+        db.execSQL("CREATE TABLE " + T_SPINNER + "(" + S_KEY + " VARCHAR," + S_NAME + " VARCHAR," + S_EXTRA1 + " VARCHAR," + S_EXTRA2 + " VARCHAR," + S_EXTRA3 + " VARCHAR," + S_EXTRA4 + " VARCHAR," + S_EXTRA5 + " VARCHAR," + S_EXTRA6 + " VARCHAR," + S_EXTRA7 + " VARCHAR," + S_EXTRA8 + " VARCHAR," + S_EXTRA9 + " VARCHAR," + S_EXTRA10 + " VARCHAR," + S_EXTRA11 + " VARCHAR," + S_EXTRA12 + " VARCHAR," + S_EXTRA13 + " VARCHAR," + S_EXTRA14 + " VARCHAR," + S_EXTRA15 + " VARCHAR," + S_EXTRA16 + " VARCHAR," + S_EXTRA17 + " VARCHAR," + S_EXTRA18 + " VARCHAR," + S_EXTRA19 + " VARCHAR," + S_EXTRA20 + " VARCHAR," + S_SOURCE + " VARCHAR);");
+        db.execSQL("CREATE TABLE " + T_LAST_SYNC + "(" + S_KEY + " VARCHAR," + S_NAME + " VARCHAR," + S_EXTRA1 + " VARCHAR);");
+
+        db.execSQL("CREATE TABLE " + T_DAILY_INSPECTION + "(" + ALL_SERIAL + " INTEGER PRIMARY KEY AUTOINCREMENT," + D_PIU_ID + " VARCHAR," + D_PIU_NAME + " VARCHAR," + ALL_SCHEME_ID + " VARCHAR," + ALL_SCHEME_NAME + " VARCHAR," + ALL_COMPONENT_ID + " VARCHAR," + ALL_COMPONENT_NAME + " VARCHAR," + D_VILLAGE_NAME + " VARCHAR," + D_GP + " VARCHAR," + D_BLOCK + " VARCHAR," + D_APP_TYPE_ID + " VARCHAR," + D_APP_TYPE_NAME + " VARCHAR," + D_DETAIL + " VARCHAR," + D_REVIEW_ID + " VARCHAR," + D_REVIEW_NAME + " VARCHAR," + D_COMMENT + " VARCHAR," + ALL_LAT + " VARCHAR," + ALL_LNG + " VARCHAR," + D_ADDRESS + " VARCHAR," + ALL_UPLOADED + " INTEGER);");
+        db.execSQL("CREATE TABLE " + T_ISA_ACTIVITY + "(" + ALL_SERIAL + " INTEGER PRIMARY KEY AUTOINCREMENT," + N_GP_ID + " VARCHAR," + N_GP_NAME + " VARCHAR," + N_VILLAGE_ID + " VARCHAR," + N_VILLAGE_NAME + " VARCHAR," + N_ACTIVITY_ID + " VARCHAR," + N_ACTIVITY_NAME + " VARCHAR," + N_REMARK + " VARCHAR," + N_DATE_O_A + " VARCHAR," + N_DATE + " VARCHAR," + N_IS_OLD + " INTEGER," + ALL_LAT + " VARCHAR," + ALL_LNG + " VARCHAR," + ALL_ADDRESS + " VARCHAR," + ALL_UPLOADED + " INTEGER);");
+        db.execSQL("CREATE TABLE " + T_PHOTO_NEW + "(" + ALL_SERIAL + " INTEGER," + S_NAME + " VARCHAR," + S_EXTRA1 + " VARCHAR," + S_EXTRA2 + " VARCHAR);");
+        db.execSQL("CREATE TABLE " + T_DHARA + "(" + ALL_SERIAL + " INTEGER PRIMARY KEY AUTOINCREMENT," + DH_MAPPING_ID + " VARCHAR," + DH_TYPE_ID + " INTEGER," + DH_TYPE_NAME + " VARCHAR," + DH_MAIN_ID + " INTEGER," + DH_LGD + " VARCHAR," + DH_VILLAGE + " VARCHAR," + DH_METER_ID + " INTEGER," + DH_START_READING + " REAL," + DH_END_READING + " REAL," + DH_END_REMARK + " VARCHAR," + DH_END_LAT + " VARCHAR," + DH_END_LNG + " VARCHAR," + DH_END_DATE + " VARCHAR," + DH_END_TIME + " VARCHAR," + DH_METER_STATUS_ID + " INTEGER," + DH_METER_STATUS_NAME + " VARCHAR," + DH_TOTAL_WS + " REAL);");
+
+        db.execSQL("CREATE TABLE " + T_DHARA_COMPONENT + "(" + DC_ID + " INTEGER," + DC_NAME + " VARCHAR," + DC_TYPE + " INTEGER," + ALL_SCHEME_ID + " INTEGER," + ALL_SCHEME_NAME + " VARCHAR," + DC_WTP_ID + " INTEGER," + ALL_ESR_ID + " VARCHAR," + ALL_ESR_NAME + " VARCHAR," + ALL_ESR_SUID + " VARCHAR," + DC_B_ID + " INTEGER," + DC_B_NAME + " VARCHAR," + DC_METER_ID + " INTEGER," + DC_METER_NAME + " VARCHAR," + DC_R1 + " REAL," + DC_R2 + " REAL," + DC_WS + " REAL," + DC_REMARK + " VARCHAR," + DC_PHOTO + " VARCHAR," + DC_R1_DATE + " VARCHAR," + DC_DATE + " VARCHAR," + ALL_LAT + " VARCHAR," + ALL_LNG + " VARCHAR," + DC_METER_STATUS_ID + " INTEGER," + DC_METER_STATUS_NAME + " VARCHAR);");
+        this.db = db;
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        try {
+            if (oldVersion == 1 && newVersion >= 2) {
+                db.execSQL("ALTER TABLE " + T_SPINNER + " ADD COLUMN " + S_EXTRA10 + " VARCHAR");
+                db.execSQL("ALTER TABLE " + T_SPINNER + " ADD COLUMN " + S_EXTRA11 + " VARCHAR");
+                db.execSQL("ALTER TABLE " + T_SPINNER + " ADD COLUMN " + S_EXTRA12 + " VARCHAR");
+                db.execSQL("ALTER TABLE " + T_SPINNER + " ADD COLUMN " + S_EXTRA13 + " VARCHAR");
+            }
+            if (oldVersion <= 2 && newVersion >= 3) {
+                db.execSQL("ALTER TABLE " + T_SPINNER + " ADD COLUMN " + S_EXTRA14 + " VARCHAR");
+                db.execSQL("ALTER TABLE " + T_SPINNER + " ADD COLUMN " + S_EXTRA15 + " VARCHAR");
+                db.execSQL("ALTER TABLE " + T_SPINNER + " ADD COLUMN " + S_EXTRA16 + " VARCHAR");
+                db.execSQL("ALTER TABLE " + T_SPINNER + " ADD COLUMN " + S_EXTRA17 + " VARCHAR");
+                db.execSQL("CREATE TABLE " + T_DHARA + "(" + ALL_SERIAL + " INTEGER PRIMARY KEY AUTOINCREMENT," + DH_MAPPING_ID + " INTEGER," + DH_TYPE_ID + " INTEGER," + DH_TYPE_NAME + " VARCHAR," + DH_MAIN_ID + " INTEGER," + DH_LGD + " VARCHAR," + DH_VILLAGE + " VARCHAR," + DH_METER_ID + " INTEGER," + DH_START_READING + " REAL," + DH_END_READING + " REAL," + DH_END_REMARK + " VARCHAR," + DH_END_LAT + " VARCHAR," + DH_END_LNG + " VARCHAR," + DH_END_DATE + " VARCHAR," + DH_END_TIME + " VARCHAR);");
+            }
+            if (oldVersion <= 3 && newVersion == 4) {
+                db.execSQL("ALTER TABLE " + T_SPINNER + " ADD COLUMN " + S_EXTRA18 + " VARCHAR");
+                db.execSQL("ALTER TABLE " + T_SPINNER + " ADD COLUMN " + S_EXTRA19 + " VARCHAR");
+                db.execSQL("ALTER TABLE " + T_SPINNER + " ADD COLUMN " + S_EXTRA20 + " VARCHAR");
+            }
+
+            if (oldVersion <= 4 && newVersion == 5) {
+                db.execSQL("ALTER TABLE " + T_DHARA + " ADD COLUMN " + DH_METER_STATUS_ID + " INTEGER");
+                db.execSQL("ALTER TABLE " + T_DHARA + " ADD COLUMN " + DH_METER_STATUS_NAME + " VARCHAR");
+                db.execSQL("ALTER TABLE " + T_DHARA + " ADD COLUMN " + DH_TOTAL_WS + " REAL");
+
+                db.execSQL("CREATE TABLE " + T_DHARA_COMPONENT + "(" + DC_ID + " INTEGER," + DC_NAME + " VARCHAR," + DC_TYPE + " INTEGER," + ALL_SCHEME_ID + " INTEGER," + ALL_SCHEME_NAME + " VARCHAR," + DC_WTP_ID + " INTEGER," + ALL_ESR_ID + " VARCHAR," + ALL_ESR_NAME + " VARCHAR," + DC_B_ID + " INTEGER," + DC_B_NAME + " VARCHAR," + DC_METER_ID + " INTEGER," + DC_METER_NAME + " VARCHAR," + DC_R1 + " REAL," + DC_R2 + " REAL," + DC_WS + " REAL," + DC_REMARK + " VARCHAR," + DC_PHOTO + " VARCHAR," + DC_R1_DATE + " VARCHAR," + DC_DATE + " VARCHAR," + ALL_LAT + " VARCHAR," + ALL_LNG + " VARCHAR," + DC_METER_STATUS_ID + " INTEGER," + DC_METER_STATUS_NAME + " VARCHAR);");
+            }
+
+            if (oldVersion <= 5 && newVersion == 6) {
+                db.execSQL("ALTER TABLE " + T_DHARA_COMPONENT + " ADD COLUMN " + ALL_ESR_SUID + " VARCHAR");
+            }
+        } catch (Exception ignore) {
+
+        }
+//        if (oldVersion == 1 && newVersion == 2) {
+//            db.execSQL("ALTER TABLE " + T_LOGIN + " ADD COLUMN " + L_TOKEN + " VARCHAR");
+////            db.execSQL("ALTER TABLE " + T_ASSERT + " ADD COLUMN " + ALL_MATERIAL_INFO_VALUE + " VARCHAR");
+//
+//            db.execSQL("CREATE TABLE " + T_DAILY_INSPECTION + "(" + ALL_SERIAL + " INTEGER PRIMARY KEY AUTOINCREMENT," + D_PIU_ID + " VARCHAR," + D_PIU_NAME + " VARCHAR," + ALL_SCHEME_ID + " VARCHAR," + ALL_SCHEME_NAME + " VARCHAR," + ALL_COMPONENT_ID + " VARCHAR," + ALL_COMPONENT_NAME + " VARCHAR," + D_VILLAGE_NAME + " VARCHAR," + D_GP + " VARCHAR," + D_BLOCK + " VARCHAR," + D_APP_TYPE_ID + " VARCHAR," + D_APP_TYPE_NAME + " VARCHAR," + D_DETAIL + " VARCHAR," + D_REVIEW_ID + " VARCHAR," + D_REVIEW_NAME + " VARCHAR," + D_COMMENT + " VARCHAR," + ALL_LAT + " VARCHAR," + ALL_LNG + " VARCHAR," + D_ADDRESS + " VARCHAR," + ALL_UPLOADED + " INTEGER);");
+//            db.execSQL("CREATE TABLE " + T_PHOTO + "(" + ALL_SERIAL + " INTEGER," + S_NAME + " VARCHAR," + S_EXTRA1 + " VARCHAR);");
+//        }else if(newVersion == 3){
+//            db.execSQL("ALTER TABLE " + T_LOGIN + " ADD COLUMN " + L_USER_ID + " INTEGER");
+//            db.execSQL("ALTER TABLE " + T_LOGIN + " ADD COLUMN " + L_ROLE + " VARCHAR");
+//            db.execSQL("ALTER TABLE " + T_LOGIN + " ADD COLUMN " + L_ROLE_ID + " INTEGER");
+//            db.execSQL("ALTER TABLE " + T_LOGIN + " ADD COLUMN " + L_MODULE + " VARCHAR");
+//
+//
+//            db.execSQL("ALTER TABLE " + T_SPINNER + " ADD COLUMN " + S_EXTRA7 + " VARCHAR");
+//            db.execSQL("ALTER TABLE " + T_SPINNER + " ADD COLUMN " + S_EXTRA8 + " VARCHAR");
+//            db.execSQL("ALTER TABLE " + T_SPINNER + " ADD COLUMN " + S_EXTRA9 + " VARCHAR");
+//        }
+    }
+
+//    public void ADD_DEPTH_COVER(@NonNull SpinnerItem spinnerItem) {
+//        this.spinner(spinnerItem, "DEPTH_COVER");
+//    }
+
+    public String ADD_DEPTH_COVER_QUERY(@NonNull SpinnerItem spinnerItem, int i) {
+        return this.spinnerQuery(spinnerItem, "DEPTH_COVER", i);
+    }
+
+//    public void ADD_MATERIAL_TYPE(@NonNull SpinnerItem spinnerItem, @NonNull String material_info_name) {
+//        this.spinner(spinnerItem, "MATERIAL_TYPE", material_info_name);
+//    }
+
+    public String ADD_MATERIAL_TYPE_QUERY(@NonNull SpinnerItem spinnerItem, @NonNull String material_info_name, int i) {
+        return this.spinnerQuery(spinnerItem, "MATERIAL_TYPE", material_info_name, i);
+    }
+
+//    public void ADD_PIPE_DIAMETER(@NonNull SpinnerItem spinnerItem, @NonNull String material_id) {
+//        this.spinner(spinnerItem, "PIPE_DIAMETER", material_id);
+//    }
+
+    public String ADD_PIPE_DIAMETER_QUERY(@NonNull SpinnerItem spinnerItem, @NonNull String material_id, int i) {
+        return this.spinnerQuery(spinnerItem, "PIPE_DIAMETER", material_id, i);
+    }
+
+//    public void ADD_MATERIAL_INFO_VALUE(@NonNull SpinnerItem spinnerItem, @NonNull String material_id) {
+//        this.spinner(spinnerItem, "MATERIAL_INFO_VALUE", material_id);
+//    }
+
+    public String ADD_MATERIAL_INFO_VALUE_QUERY(@NonNull SpinnerItem spinnerItem, @NonNull String material_id, int i) {
+        return this.spinnerQuery(spinnerItem, "MATERIAL_INFO_VALUE", material_id, i);
+    }
+
+    public void ADD_DESIGNATION(@NonNull SpinnerItem spinnerItem) {
+        this.spinner(spinnerItem, "DESIGNATION");
+    }
+
+//    public void ADD_SCHEME(@NonNull SpinnerItem spinnerItem) {
+//        this.spinner(spinnerItem, "SCHEME");
+//    }
+
+    public String ADD_SCHEME_QUERY(@NonNull SpinnerItem spinnerItem, int i) {
+        return this.spinnerQuery(spinnerItem, "SCHEME", i);
+    }
+
+//    public void ADD_SCHEME_DI_NEW(@NonNull SpinnerItem spinnerItem) {
+//        this.spinner(spinnerItem, "DI_SCHEME");
+//    }
+
+//    public void ADD_SCHEME(@NonNull SpinnerItem spinnerItem, @NonNull String piu_id) {
+//        this.spinner(spinnerItem, "SCHEME", piu_id);
+//    }
+
+    public void ADD_SCHEME_DI_NEW(@NonNull SpinnerItem spinnerItem, @NonNull String piu_id) {
+        this.spinner(spinnerItem, "DI_SCHEME", piu_id);
+    }
+
+//    public void ADD_ESR(@NonNull SpinnerItem spinnerItem, @NonNull String scheme_id) {
+//        this.spinner(spinnerItem, "ESR", scheme_id);
+//    }
+
+    public String ADD_ESR_QUERY(@NonNull SpinnerItem spinnerItem, @NonNull String scheme_id, int i) {
+        return this.spinnerQuery(spinnerItem, "ESR", scheme_id, i);
+    }
+
+    public void ADD_COMPONENT_AM(@NonNull SpinnerItem spinnerItem, @NonNull String scheme_id) {
+//        this.spinner(spinnerItem, "COMPONENT", scheme_id);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(S_KEY, spinnerItem.getKeyString());
+        contentValues.put(S_NAME, spinnerItem.getValue());
+        contentValues.put(S_SOURCE, "COMPONENT");
+        contentValues.put(S_EXTRA1, scheme_id);
+        Component component = (Component) spinnerItem.getExtra();
+        contentValues.put(S_EXTRA2, component.getHead());
+        contentValues.put(S_EXTRA3, component.getLayer());
+        contentValues.put(S_EXTRA4, component.getType());
+        db.insert(T_SPINNER, null, contentValues);
+    }
+
+    public void ADD_COMPONENT_DI_NEW(@NonNull SpinnerItem spinnerItem, @NonNull String scheme_id) {
+//        this.spinner(spinnerItem, "COMPONENT_DI", scheme_id);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(S_KEY, spinnerItem.getKeyString());
+        contentValues.put(S_NAME, spinnerItem.getValue());
+        contentValues.put(S_SOURCE, "COMPONENT_DI");
+        contentValues.put(S_EXTRA1, scheme_id);
+        Component component = (Component) spinnerItem.getExtra();
+        contentValues.put(S_EXTRA2, component.getHead());
+        contentValues.put(S_EXTRA3, component.getLayer());
+        contentValues.put(S_EXTRA4, component.getType());
+        db.insert(T_SPINNER, null, contentValues);
+    }
+
+    public String ADD_COMPONENT_QUERY(@NonNull SpinnerItem spinnerItem, @NonNull String scheme_id, int i) {
+        Component component = (Component) spinnerItem.getExtra();
+        StringBuilder sb = new StringBuilder();
+        if (i == 0) {
+            sb.append("INSERT INTO " + T_SPINNER + "(" + S_KEY + "," + S_NAME + "," + S_SOURCE + "," + S_EXTRA1 + "," + S_EXTRA2 + "," + S_EXTRA3 + "," + S_EXTRA4 + ") VALUES ");
+        } else {
+            sb.append(",");
+        }
+        sb.append("('").append(spinnerItem.getKeyString().replace("'", " ")).append("','").append(spinnerItem.getValue().replace("'", " ")).append("','COMPONENT','").append(scheme_id).append("','").append(component.getHead()).append("','").append(component.getLayer()).append("','").append(component.getType()).append("')");
+        return sb.toString();
+    }
+
+
+    public void addDailyInspection(boolean old, @NonNull String village, @NonNull String gp, @NonNull String block, @NonNull String detail, @NonNull String comment, @NonNull LatLng latLng, @NonNull String address, @NonNull SpinnerItem piu, @NonNull SpinnerItem scheme, @NonNull SpinnerItem component, @NonNull SpinnerItem app_type, @NonNull SpinnerItem review, @NonNull List<String> images, @NonNull Context context) throws Exception {
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(D_PIU_ID, piu.getKeyString());
+        contentValues.put(D_PIU_NAME, piu.getValue());
+
+        contentValues.put(ALL_SCHEME_ID, scheme.getKeyString());
+        contentValues.put(ALL_SCHEME_NAME, scheme.getValue());
+
+        contentValues.put(ALL_COMPONENT_ID, component.getKeyString());
+        contentValues.put(ALL_COMPONENT_NAME, component.getValue());
+
+        contentValues.put(D_VILLAGE_NAME, village);
+        contentValues.put(D_GP, gp);
+        contentValues.put(D_BLOCK, block);
+
+        contentValues.put(D_APP_TYPE_ID, app_type.getKeyString());
+        contentValues.put(D_APP_TYPE_NAME, app_type.getValue());
+
+        contentValues.put(D_DETAIL, detail);
+        contentValues.put(D_COMMENT, comment);
+
+        contentValues.put(ALL_LAT, latLng.latitude);
+        contentValues.put(ALL_LNG, latLng.longitude);
+        contentValues.put(D_ADDRESS, address);
+
+        contentValues.put(D_REVIEW_ID, review.getKeyString());
+        contentValues.put(D_REVIEW_NAME, review.getValue());
+
+
+        contentValues.put(ALL_UPLOADED, old ? 1 : 0);
+
+        long id = db.insert(T_DAILY_INSPECTION, null, contentValues);
+        if (id == -1) {
+            throw new Exception("Something is wrong.");
+        }
+        for (String image : images) {
+            saveBase64(id, image, T_DAILY_INSPECTION, context, (success, jsonArray, base64) -> {
+
+            });
+//            ContentValues cv = new ContentValues();
+//            cv.put(ALL_SERIAL, id);
+//            cv.put(S_NAME, image);
+//            cv.put(S_EXTRA1, T_DAILY_INSPECTION);
+//            db.insert(T_PHOTO, null, cv);
+        }
+    }
+
+    @NonNull
+    public List<DI> getDailyInspection() {
+        List<DI> dis = new ArrayList<>();
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_DAILY_INSPECTION + " ORDER BY " + ALL_UPLOADED, null)) {// ORDER BY S_NAME
+            while (cursor.moveToNext()) {
+                dis.add(new DI(cursor.getLong(cursor.getColumnIndexOrThrow(ALL_SERIAL)), cursor.getString(cursor.getColumnIndexOrThrow(D_ADDRESS)), cursor.getString(cursor.getColumnIndexOrThrow(D_VILLAGE_NAME)), cursor.getString(cursor.getColumnIndexOrThrow(D_GP)), cursor.getString(cursor.getColumnIndexOrThrow(D_BLOCK)), cursor.getString(cursor.getColumnIndexOrThrow(D_DETAIL)), cursor.getString(cursor.getColumnIndexOrThrow(D_APP_TYPE_NAME)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_SCHEME_NAME)), cursor.getString(cursor.getColumnIndexOrThrow(D_PIU_NAME)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_COMPONENT_NAME)), cursor.getString(cursor.getColumnIndexOrThrow(D_COMMENT)), cursor.getString(cursor.getColumnIndexOrThrow(D_REVIEW_NAME)), "", cursor.getInt(cursor.getColumnIndexOrThrow(ALL_UPLOADED)) == 1));
+            }
+        }
+        return dis;
+    }
+
+
+    public void getDIObject(@NonNull String token, long id, @NonNull Context context, @NonNull OnDataReceived<Data> onDataReceived) {
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_DAILY_INSPECTION + " WHERE " + ALL_SERIAL + " = '" + id + "'", null)) {// ORDER BY S_NAME
+            if (cursor.moveToNext()) {
+                final Data data = new Data();
+                data.put("etokens", token);
+                data.put("piu_id", cursor.getString(cursor.getColumnIndexOrThrow(D_PIU_ID)));
+                data.put("scheme_id", cursor.getString(cursor.getColumnIndexOrThrow(ALL_SCHEME_ID)));
+                data.put("component_id", cursor.getString(cursor.getColumnIndexOrThrow(ALL_COMPONENT_ID)));
+                data.put("village_name", cursor.getString(cursor.getColumnIndexOrThrow(D_VILLAGE_NAME)));
+                data.put("block_name", cursor.getString(cursor.getColumnIndexOrThrow(D_BLOCK)));
+                data.put("gp_name", cursor.getString(cursor.getColumnIndexOrThrow(D_GP)));
+                data.put("application_type_id", cursor.getString(cursor.getColumnIndexOrThrow(D_APP_TYPE_ID)));
+                data.put("description", cursor.getString(cursor.getColumnIndexOrThrow(D_DETAIL)));
+                data.put("qa_qc_review", cursor.getString(cursor.getColumnIndexOrThrow(D_REVIEW_ID)));
+                data.put("qa_qc_remark", cursor.getString(cursor.getColumnIndexOrThrow(D_COMMENT)));
+                data.put("latitude", cursor.getString(cursor.getColumnIndexOrThrow(ALL_LAT)));
+                data.put("longitude", cursor.getString(cursor.getColumnIndexOrThrow(ALL_LNG)));
+                data.put("address", cursor.getString(cursor.getColumnIndexOrThrow(D_ADDRESS)));
+                getBase64(id, T_DAILY_INSPECTION, context, (success, jsonArray, base64) -> {
+                    if (success) {
+                        jsonArray = new JSONArray();
+                    }
+                    data.put("image_base64", jsonArray);
+                    onDataReceived.get(true, data);
+                });
+//                JSONArray jsonArray = new JSONArray();
+//                try (Cursor c2 = db.rawQuery("SELECT * FROM " + T_PHOTO + " WHERE " + ALL_SERIAL + " = '" + id + "' AND " + S_EXTRA1 + "='" + T_DAILY_INSPECTION + "'", null)) {// ORDER BY S_NAME
+//                    while (c2.moveToNext()) {
+//                        jsonArray.put(c2.getString(c2.getColumnIndexOrThrow(S_NAME)));
+//                    }
+//                }
+            } else {
+                onDataReceived.get(false, null);
+            }
+        }
+    }
+
+    public void ADD_DISTRICT_AM(@NonNull SpinnerItem spinnerItem) {
+        this.spinner(spinnerItem, "DISTRICT");
+    }
+
+    public void ADD_DISTRICT_DI_NEW(@NonNull SpinnerItem spinnerItem) {
+        this.spinner(spinnerItem, "DISTRICT_DI");
+    }
+
+    public String ADD_DISTRICT_QUERY_AM(@NonNull SpinnerItem spinnerItem, int i) {
+        return this.spinnerQuery(spinnerItem, "DISTRICT", i);
+    }
+
+    public void ADD_QA_QC_REVIEW_DI_NEW(@NonNull SpinnerItem spinnerItem) {
+        this.spinner(spinnerItem, "QA_QC_REVIEW_DI");
+    }
+
+
+    public void ADD_STAGES_RFI(@NonNull SpinnerItem spinnerItem) {
+        this.spinner(spinnerItem, "STAGES_RFI");
+    }
+
+    public void ADD_APPLICATION_TYPE(@NonNull SpinnerItem spinnerItem) {
+        this.spinner(spinnerItem, "APPLICATION_TYPE");
+    }
+
+    public void ADD_DHARA_METER_STATUS(@NonNull SpinnerItem spinnerItem) {
+        this.spinner(spinnerItem, "DHARA_METER_STATUS");
+    }
+
+//    public void ADD_POINTS(@NonNull SpinnerItem spinnerItem, @NonNull String scheme_id, @NonNull String cid, @NonNull String lgdCode, @NonNull String village) {
+//        ContentValues contentValues = new ContentValues();
+//        contentValues.put(S_KEY, spinnerItem.getKeyString());
+//        contentValues.put(S_NAME, spinnerItem.getValue());
+//        contentValues.put(S_SOURCE, "POINTS");
+//        contentValues.put(S_EXTRA1, scheme_id);
+//        contentValues.put(S_EXTRA2, cid);
+//        Point point = (Point) spinnerItem.getExtra();
+//        contentValues.put(S_EXTRA3, point.getLat());
+//        contentValues.put(S_EXTRA4, point.getLng());
+//        contentValues.put(S_EXTRA5, lgdCode);
+//        contentValues.put(S_EXTRA6, village.isEmpty() ? "N/A" : village);
+//        db.insert(T_SPINNER, null, contentValues);
+//    }
+
+    public String ADD_POINTS_QUERY(@NonNull SpinnerItem spinnerItem, @NonNull String scheme_id, @NonNull String cid, @NonNull String lgdCode, @NonNull String village, int i) {
+        Point point = (Point) spinnerItem.getExtra();
+        StringBuilder sb = new StringBuilder();
+        if (i % 10000 == 0) {
+            sb.append("INSERT INTO " + T_SPINNER + "(" + S_KEY + "," + S_NAME + "," + S_SOURCE + "," + S_EXTRA1 + "," + S_EXTRA2 + "," + S_EXTRA3 + "," + S_EXTRA4 + "," + S_EXTRA5 + "," + S_EXTRA6 + ") VALUES ");
+        } else {
+            sb.append(",");
+        }
+        sb.append("('").append(spinnerItem.getKeyString().replace("'", " ")).append("','").append(spinnerItem.getValue().replace("'", " ")).append("','POINTS','").append(scheme_id).append("','").append(cid).append("','").append(point.getLat()).append("','").append(point.getLng()).append("','").append(lgdCode).append("','").append(village.isEmpty() ? "N/A" : village).append("')");
+        return sb.toString();
+//        ContentValues contentValues = new ContentValues();
+//        contentValues.put(S_KEY, spinnerItem.getKeyString());
+//        contentValues.put(S_NAME, spinnerItem.getValue());
+//        contentValues.put(S_SOURCE, "POINTS");
+//        contentValues.put(S_EXTRA1, scheme_id);
+//        contentValues.put(S_EXTRA2, cid);
+//        Point point = (Point) spinnerItem.getExtra();
+//        contentValues.put(S_EXTRA3, point.getLat());
+//        contentValues.put(S_EXTRA4, point.getLng());
+//        contentValues.put(S_EXTRA5, lgdCode);
+//        contentValues.put(S_EXTRA6, village.isEmpty() ? "N/A" : village);
+//        db.insert(T_SPINNER, null, contentValues);
+    }
+
+
+    private void spinner(@NonNull SpinnerItem spinnerItem, @NonNull String source) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(S_KEY, spinnerItem.getKeyString());
+        contentValues.put(S_NAME, spinnerItem.getValue());
+        contentValues.put(S_SOURCE, source);
+        contentValues.put(S_EXTRA1, "");
+        db.insert(T_SPINNER, null, contentValues);
+    }
+
+    @NonNull
+    private String spinnerQuery(@NonNull SpinnerItem spinnerItem, @NonNull String source, int i) {
+        StringBuilder sb = new StringBuilder();
+        if (i == 0) {
+            sb.append("INSERT INTO " + T_SPINNER + "(" + S_KEY + "," + S_NAME + "," + S_SOURCE + "," + S_EXTRA1 + ") VALUES");
+        } else {
+            sb.append(",");
+        }
+        sb.append("('").append(spinnerItem.getKeyString().replace("'", " ")).append("','").append(spinnerItem.getValue().replace("'", " ")).append("','").append(source).append("','')");
+        return sb.toString();
+    }
+
+    private void spinner(@NonNull SpinnerItem spinnerItem, @NonNull String source, @NonNull String extra) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(S_KEY, spinnerItem.getKeyString());
+        contentValues.put(S_NAME, spinnerItem.getValue());
+        contentValues.put(S_SOURCE, source);
+        contentValues.put(S_EXTRA1, extra);
+        db.insert(T_SPINNER, null, contentValues);
+    }
+
+    @NonNull
+    private String spinnerQuery(@NonNull SpinnerItem spinnerItem, @NonNull String source, @NonNull String extra, int i) {
+        StringBuilder sb = new StringBuilder();
+        if (i == 0) {
+            sb.append("INSERT INTO " + T_SPINNER + "(" + S_KEY + "," + S_NAME + "," + S_SOURCE + "," + S_EXTRA1 + ") VALUES");
+        } else {
+            sb.append(",");
+        }
+        sb.append("('").append(spinnerItem.getKeyString().replace("'", " ")).append("','").append(spinnerItem.getValue().replace("'", " ")).append("','").append(source).append("','").append(extra).append("')");
+        return sb.toString();
+    }
+
+
+    public void CLEAR_DEPTH_COVER() {
+        this.clearSpinner("DEPTH_COVER");
+    }
+
+
+    public void CLEAR_QA_QC_REVIEW_DI_NEW() {
+        this.clearSpinner("QA_QC_REVIEW_DI");
+    }
+
+    public void CLEAR_STAGES_RFI() {
+        this.clearSpinner("STAGES_RFI");
+    }
+
+    public void CLEAR_MATERIAL_TYPE() {
+        this.clearSpinner("MATERIAL_TYPE");
+    }
+
+    public void CLEAR_PIPE_DIAMETER() {
+        this.clearSpinner("PIPE_DIAMETER");
+    }
+
+    public void CLEAR_MATERIAL_INFO_VALUE() {
+        this.clearSpinner("MATERIAL_INFO_VALUE");
+    }
+
+    public void CLEAR_DESIGNATION() {
+        this.clearSpinner("DESIGNATION");
+    }
+
+    public void CLEAR_SCHEME() {
+        this.clearSpinner("SCHEME");
+    }
+
+    public void CLEAR_SCHEME_DI_NEW() {
+        this.clearSpinner("DI_SCHEME");
+    }
+
+    public void CLEAR_APPLICATION_TYPE() {
+        this.clearSpinner("APPLICATION_TYPE");
+    }
+
+    public void CLEAR_ESR() {
+        this.clearSpinner("ESR");
+    }
+
+    public void CLEAR_COMPONENT_AM() {
+        this.clearSpinner("COMPONENT");
+    }
+
+    public void CLEAR_COMPONENT_DI_NEW() {
+        this.clearSpinner("COMPONENT_DI");
+    }
+
+    public void CLEAR_DISTRICT_AM() {
+        this.clearSpinner("DISTRICT");
+    }
+
+    public void CLEAR_DISTRICT_DI_NEW() {
+        this.clearSpinner("DISTRICT_DI");
+    }
+
+    public void CLEAR_POINTS() {
+        this.clearSpinner("POINTS");
+    }
+
+    public void CLEAR_DHARA_METER_STATUS() {
+        this.clearSpinner("DHARA_METER_STATUS");
+    }
+
+    private void clearSpinner(@NonNull String source) {
+        db.delete(T_SPINNER, S_SOURCE + "=?", new String[]{source});
+    }
+
+//    private void clearSpinner(@NonNull String source, @NonNull String extra) {
+//        db.delete(T_SPINNER, S_SOURCE + "=? AND " + S_EXTRA + "=?", new String[]{source, extra});
+//    }
+
+    public List<SpinnerItem> GET_DEPTH_COVER() {
+        return this.getSpinners("DEPTH_COVER", false);
+    }
+
+
+    public List<SpinnerItem> GET_QA_QC_REVIEW_DI_NEW() {
+        return this.getSpinners("QA_QC_REVIEW_DI", false);
+    }
+
+    public List<SpinnerItem> GET_STAGES_RFI() {
+        return this.getSpinners("STAGES_RFI", false);
+    }
+
+    public List<SpinnerItem> GET_MATERIAL_TYPE() {
+        return this.getSpinners("MATERIAL_TYPE", false);
+    }
+
+    public List<SpinnerItem> GET_PIPE_DIAMETER(@NonNull String material_id) {
+        return this.getSpinners("PIPE_DIAMETER", material_id, false);
+    }
+
+
+    public List<SpinnerItem> GET_APPLICATION_TYPE() {
+        return this.getSpinners("APPLICATION_TYPE", false);
+    }
+
+
+    public List<SpinnerItem> GET_MATERIAL_INFO_VALUE(@NonNull String material_id) {
+        return this.getSpinners("MATERIAL_INFO_VALUE", material_id, false);
+    }
+
+
+    public List<SpinnerItem> GET_DESIGNATION() {
+        return this.getSpinners("DESIGNATION", false);
+    }
+
+    public List<SpinnerItem> GET_SCHEME() {
+        return this.getSpinners("SCHEME", false);
+    }
+
+//    public List<SpinnerItem> GET_SCHEME(@NonNull String piu_id) {
+//        return this.getSpinners("SCHEME", piu_id);
+//    }
+
+    public List<SpinnerItem> GET_SCHEME_DI_NEW(@NonNull String piu_id) {
+        return this.getSpinners("DI_SCHEME", piu_id, false);
+    }
+
+
+//    public List<SpinnerItem> GET_ESR(@NonNull String scheme_id) {
+//        return this.getSpinners("ESR", scheme_id);
+//    }
+
+    public List<SpinnerItem> GET_COMPONENT_DI_NEW() {
+        return this.getSpinners("COMPONENT_DI", false);
+    }
+
+    public List<SpinnerItem> GET_DHARA_METER_STATUS() {
+        return this.getSpinners("DHARA_METER_STATUS", true);
+    }
+
+    public List<SpinnerItem> GET_COMPONENT_AM(@NonNull String scheme_id, int type) {//1,2,(INT_ALL)
+        List<SpinnerItem> spinnerItems = new ArrayList<>();
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_SPINNER + " WHERE " + S_SOURCE + "=? AND " + S_EXTRA1 + "=? " + (type == INT_ALL ? "" : "AND " + S_EXTRA4 + "=" + type + " ") + " ORDER BY " + S_NAME, new String[]{"COMPONENT", scheme_id})) {
+            while (cursor.moveToNext()) {
+                spinnerItems.add(new SpinnerItem(cursor.getString(cursor.getColumnIndexOrThrow(S_KEY)), cursor.getString(cursor.getColumnIndexOrThrow(S_NAME)), new Component(cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA2)), cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA3)), cursor.getInt(cursor.getColumnIndexOrThrow(S_EXTRA4)))));
+            }
+        }
+        return spinnerItems;
+    }
+
+    public List<LayerInfo> GET_COMPONENT_ONLY_AM(boolean byDefaultON, @NonNull String scheme_id, int type, String lineId) {//1,2,(INT_ALL)
+        List<LayerInfo> layerInfos = new ArrayList<>();
+        Component c;
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_SPINNER + " WHERE " + S_SOURCE + "=? AND " + S_EXTRA1 + "=? " + (type == INT_ALL ? "" : "AND " + S_EXTRA4 + "=" + type + " ") + " ORDER BY " + S_NAME, new String[]{"COMPONENT", scheme_id})) {
+            while (cursor.moveToNext()) {
+                String id = cursor.getString(cursor.getColumnIndexOrThrow(S_KEY));
+                c = new Component(cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA2)), cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA3)), cursor.getInt(cursor.getColumnIndexOrThrow(S_EXTRA4)));
+                layerInfos.add(new LayerInfo(id, cursor.getString(cursor.getColumnIndexOrThrow(S_NAME)), c, (byDefaultON && (c.getType() == 1 || id.equals(lineId)))));
+            }
+        }
+        return layerInfos;
+    }
+
+    @Nullable
+    public LayerInfo GET_COMPONENT_ONLY1_AM(@NonNull String scheme_id, String comp_id) {//1,2,(INT_ALL)
+        Log.e("QQCC", "S " + scheme_id + " - " + comp_id);
+        Component c;
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_SPINNER + " WHERE " + S_SOURCE + "=? AND " + S_EXTRA1 + "=? AND " + S_KEY + "=? ORDER BY " + S_NAME, new String[]{"COMPONENT", scheme_id, comp_id})) {
+            if (cursor.moveToNext()) {
+                String id = cursor.getString(cursor.getColumnIndexOrThrow(S_KEY));
+                c = new Component(cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA2)), cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA3)), cursor.getInt(cursor.getColumnIndexOrThrow(S_EXTRA4)));
+                return new LayerInfo(id, cursor.getString(cursor.getColumnIndexOrThrow(S_NAME)), c, true);
+            }
+        }
+        return null;
+    }
+
+    public List<SpinnerItem> GET_DISTRICT_AM() {
+        return this.getSpinners("DISTRICT", false);
+    }
+
+    public List<SpinnerItem> GET_DISTRICT_DI_NEW() {
+        return this.getSpinners("DISTRICT_DI", false);
+    }
+
+    @NonNull
+    private List<SpinnerItem> getSpinners(@NonNull String source, boolean isIntKey) {
+        List<SpinnerItem> spinnerItems = new ArrayList<>();
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_SPINNER + " WHERE " + S_SOURCE + "=?", new String[]{source})) {// ORDER BY S_NAME
+            while (cursor.moveToNext()) {
+                if (isIntKey) {
+                    spinnerItems.add(new SpinnerItem(cursor.getInt(cursor.getColumnIndexOrThrow(S_KEY)), cursor.getString(cursor.getColumnIndexOrThrow(S_NAME)), cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA1))));
+                } else {
+                    spinnerItems.add(new SpinnerItem(cursor.getString(cursor.getColumnIndexOrThrow(S_KEY)), cursor.getString(cursor.getColumnIndexOrThrow(S_NAME)), cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA1))));
+                }
+            }
+        }
+        return spinnerItems;
+    }
+
+    @NonNull
+    private List<SpinnerItem> getSpinners(@NonNull String source, @NonNull String extra, boolean isIntKey) {
+        List<SpinnerItem> spinnerItems = new ArrayList<>();
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_SPINNER + " WHERE " + S_SOURCE + "=? AND " + S_EXTRA1 + "=?", new String[]{source, extra})) {//ORDER BY S_NAME
+            while (cursor.moveToNext()) {
+                if (isIntKey) {
+                    spinnerItems.add(new SpinnerItem(cursor.getInt(cursor.getColumnIndexOrThrow(S_KEY)), cursor.getString(cursor.getColumnIndexOrThrow(S_NAME)), cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA1))));
+                } else {
+                    spinnerItems.add(new SpinnerItem(cursor.getString(cursor.getColumnIndexOrThrow(S_KEY)), cursor.getString(cursor.getColumnIndexOrThrow(S_NAME)), cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA1))));
+                }
+            }
+        }
+        return spinnerItems;
+    }
+
+    @NonNull
+    public List<SpinnerItem> GET_POINTS(@NonNull String scheme_id, @NonNull String cid, @Nullable String lgdCode) {
+        List<SpinnerItem> spinnerItems = new ArrayList<>();
+        if (lgdCode == null) {
+            Log.e("lgdCode", "N/A");
+            try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_SPINNER + " WHERE " + S_SOURCE + "=? AND " + S_KEY + " NOT IN (SELECT " + ALL_POINT_ID + " FROM " + T_ASSERT + " WHERE " + ALL_COMPONENT_ID + "='" + cid + "') AND " + S_EXTRA1 + "=? AND " + S_EXTRA2 + "=?", new String[]{"POINTS", scheme_id, cid})) {// ORDER BY S_NAME
+                while (cursor.moveToNext()) {
+                    spinnerItems.add(new SpinnerItem(cursor.getString(cursor.getColumnIndexOrThrow(S_KEY)), cursor.getString(cursor.getColumnIndexOrThrow(S_NAME)), new Point(cursor.getDouble(cursor.getColumnIndexOrThrow(S_EXTRA3)), cursor.getDouble(cursor.getColumnIndexOrThrow(S_EXTRA4)))));
+                }
+            }
+        } else {
+            Log.e("lgdCode", lgdCode);
+            try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_SPINNER + " WHERE " + S_SOURCE + "=? AND " + S_KEY + " NOT IN (SELECT " + ALL_POINT_ID + " FROM " + T_ASSERT + " WHERE " + ALL_COMPONENT_ID + "='" + cid + "') AND " + S_EXTRA1 + "=? AND " + S_EXTRA2 + "=? AND " + S_EXTRA5 + "=?", new String[]{"POINTS", scheme_id, cid, lgdCode})) {// ORDER BY S_NAME
+                while (cursor.moveToNext()) {
+                    spinnerItems.add(new SpinnerItem(cursor.getString(cursor.getColumnIndexOrThrow(S_KEY)), cursor.getString(cursor.getColumnIndexOrThrow(S_NAME)), new Point(cursor.getDouble(cursor.getColumnIndexOrThrow(S_EXTRA3)), cursor.getDouble(cursor.getColumnIndexOrThrow(S_EXTRA4)))));
+                }
+            }
+        }
+        Log.e("lgdCode_C", spinnerItems.size() + " A");
+        return spinnerItems;
+    }
+
+    @NonNull
+    public List<SpinnerItem> GET_ESR_NEW(@NonNull String scheme_id, @NonNull String cid) {
+        List<SpinnerItem> spinnerItems = new ArrayList<>();
+        try (Cursor cursor = db.rawQuery("SELECT DISTINCT " + S_EXTRA5 + "," + S_EXTRA6 + " FROM " + T_SPINNER + " WHERE " + S_SOURCE + "=? AND " + S_EXTRA1 + "=? AND " + S_EXTRA2 + "=?", new String[]{"POINTS", scheme_id, cid})) {// ORDER BY S_NAME
+            while (cursor.moveToNext()) {
+                spinnerItems.add(new SpinnerItem(cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA5)), cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA6))));
+            }
+        }
+        return spinnerItems;
+    }
+
+    @NonNull
+    public List<Asset> getAsset(boolean all, String imei) {
+        List<Asset> spinnerItems = new ArrayList<>();
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_ASSERT + " WHERE " + (all ? (ALL_IMEI + "='" + imei + "'") : (ALL_UPLOADED + "=0")) + " ORDER BY " + ALL_SERIAL + " DESC", null)) {
+            while (cursor.moveToNext()) {
+                spinnerItems.add(new Asset(cursor.getLong(cursor.getColumnIndexOrThrow(ALL_SERIAL)), cursor.getString(cursor.getColumnIndexOrThrow(AA_PAST_POINT_ID)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_SCHEME_ID)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_SCHEME_NAME)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_ESR_ID)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_ESR_NAME)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_POINT_ID)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_POINT_NAME)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_COMPONENT_ID)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_COMPONENT_NAME)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_LAT)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_LNG)), cursor.getString(cursor.getColumnIndexOrThrow(A_REMARK)), cursor.getString(cursor.getColumnIndexOrThrow(A_PHOTO)), cursor.getString(cursor.getColumnIndexOrThrow(AA_DATE)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_DEPTH_COVER)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_DIAMETER)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_MATERIAL)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_ALIGNMENT)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_MATERIAL_INFO_NAME)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_MATERIAL_INFO_VALUE)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_LINE_JSON)), cursor.getInt(cursor.getColumnIndexOrThrow(ALL_UPLOADED)) == 1));
+            }
+        }
+        return spinnerItems;
+    }
+
+    @NonNull
+    public List<Line> getAssetLine() {
+        List<Line> lines = new ArrayList<>();
+//        try (Cursor cursor = db.rawQuery("SELECT t1." + ALL_POINT_NAME + ",t1." + ALL_LAT + ",t1." + ALL_LNG + ",t1." + ALL_LINE_JSON + ",IFNULL(t2." + ALL_LAT + ",0) AS t2_lat,IFNULL(t2." + ALL_LNG + ",0) AS t2_lng FROM " + T_ASSERT + " t1 LEFT JOIN " + T_ASSERT + " t2 ON t2." + ALL_POINT_ID + "=t1." + AA_PAST_POINT_ID + " AND t2." + ALL_COMPONENT_ID + "=t1." + ALL_COMPONENT_ID + " ORDER BY t1." + ALL_SERIAL + " DESC", null)) {
+        try (Cursor cursor = db.rawQuery("SELECT " + ALL_POINT_NAME + "," + ALL_LINE_JSON + "," + ALL_LAT + "," + ALL_LNG + " FROM " + T_ASSERT + " ORDER BY " + ALL_SERIAL + " DESC", null)) {
+            while (cursor.moveToNext()) {
+                JSONArray jsonArray = null;
+                try {
+                    jsonArray = new JSONArray(cursor.getString(cursor.getColumnIndexOrThrow(ALL_LINE_JSON)));
+                } catch (Exception ignore) {
+                }
+                lines.add(new Line(cursor.getString(cursor.getColumnIndexOrThrow(ALL_POINT_NAME)), new LatLng(cursor.getDouble(cursor.getColumnIndexOrThrow(ALL_LAT)), cursor.getDouble(cursor.getColumnIndexOrThrow(ALL_LNG))), jsonArray));//, cursor.getDouble(cursor.getColumnIndexOrThrow("t2_lat")) == 0 ? null : new LatLng(cursor.getDouble(cursor.getColumnIndexOrThrow("t2_lat")), cursor.getDouble(cursor.getColumnIndexOrThrow("t2_lng")))
+            }
+        }
+        return lines;
+    }
+
+
+//    public List<SpinnerItem> GET_PAST_POINT(@NonNull String compID) {
+//        List<SpinnerItem> spinnerItems = new ArrayList<>();
+//        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_ASSERT + " WHERE " + ALL_COMPONENT_ID + "='" + compID + "' ORDER BY " + ALL_SERIAL + " DESC", null)) {
+//            while (cursor.moveToNext()) {
+//                spinnerItems.add(new SpinnerItem(String.valueOf(cursor.getLong(cursor.getColumnIndexOrThrow(ALL_POINT_ID))), cursor.getString(cursor.getColumnIndexOrThrow(ALL_POINT_NAME)), new Point(cursor.getDouble(cursor.getColumnIndexOrThrow(ALL_LAT)), cursor.getDouble(cursor.getColumnIndexOrThrow(ALL_LNG)))));
+//            }
+//        }
+//        return spinnerItems;
+//    }
+
+    public void addAsset(@NonNull Asset asset, String imei) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(AA_PAST_POINT_ID, asset.getPastPointId());
+        contentValues.put(ALL_SCHEME_ID, asset.getSchemeId());
+        contentValues.put(ALL_SCHEME_NAME, asset.getSchemeName());
+        contentValues.put(ALL_ESR_ID, asset.getEsrId());
+        contentValues.put(ALL_ESR_NAME, asset.getEsrName());
+        contentValues.put(ALL_POINT_ID, asset.getPointId());
+        contentValues.put(ALL_POINT_NAME, asset.getPointName());
+        contentValues.put(ALL_COMPONENT_ID, asset.getComponentId());
+        contentValues.put(ALL_COMPONENT_NAME, asset.getComponentName());
+        contentValues.put(ALL_LAT, asset.getLat());
+        contentValues.put(ALL_LNG, asset.getLng());
+        contentValues.put(A_REMARK, asset.getRemark());
+        contentValues.put(A_PHOTO, asset.getPhoto());
+        contentValues.put(AA_DATE, asset.getDate());
+        contentValues.put(ALL_DEPTH_COVER, asset.getDepthCover());
+        contentValues.put(ALL_DIAMETER, asset.getDiameter());
+        contentValues.put(ALL_MATERIAL, asset.getMaterial());
+        contentValues.put(ALL_ALIGNMENT, asset.getAlignment());
+        contentValues.put(ALL_MATERIAL_INFO_NAME, asset.getMaterialInfoName());
+        contentValues.put(ALL_MATERIAL_INFO_VALUE, asset.getMaterialInfoValue());
+        contentValues.put(ALL_LINE_JSON, asset.getLineJson());
+        contentValues.put(ALL_UPLOADED, asset.isUploaded() ? 1 : 0);
+        contentValues.put(ALL_IMEI, imei);
+        db.insert(T_ASSERT, null, contentValues);
+    }
+
+//    public String addAssetQuery(@NonNull Asset asset, String imei, int i) {
+//        StringBuilder sb = new StringBuilder();
+//        if (i % 100 == 0) {
+//            sb.append("INSERT INTO " + T_ASSERT + "(" + AA_PAST_POINT_ID + "," + ALL_SCHEME_ID + "," + ALL_SCHEME_NAME + "," + ALL_ESR_ID + "," + ALL_ESR_NAME + "," + ALL_POINT_ID + "," + ALL_POINT_NAME + "," + ALL_COMPONENT_ID + "," + ALL_COMPONENT_NAME + "," + ALL_LAT + "," + ALL_LNG + "," + A_REMARK + "," + A_PHOTO + "," + AA_DATE + "," + ALL_DEPTH_COVER + "," + ALL_DIAMETER + "," + ALL_MATERIAL + "," + ALL_ALIGNMENT + "," + ALL_MATERIAL_INFO_NAME + "," + ALL_MATERIAL_INFO_VALUE + "," + ALL_LINE_JSON + "," + ALL_UPLOADED + "," + ALL_IMEI + ") VALUES ");
+//        } else {
+//            sb.append(",");
+//        }
+//        sb.append("('" + asset.getPastPointId() + "','" + asset.getSchemeId() + "','" + asset.getSchemeName().replace("'", " ") + "'," +
+//                "'" + asset.getEsrId() + "','" + asset.getEsrName().replace("'", " ") + "','" + asset.getPointId() + "','" + asset.getPointName().replace("'", " ") + "','" + asset.getComponentId() + "'," +
+//                "'" + asset.getComponentName().replace("'", " ") + "','" + asset.getLat() + "','" + asset.getLng() + "','" + asset.getRemark().replace("'", " ") + "','" + asset.getPhoto() + "'," +
+//                "'" + asset.getDate().replace("'", " ") + "','" + asset.getDepthCover().replace("'", " ") + "','" + asset.getDiameter().replace("'", " ") + "','" + asset.getMaterial().replace("'", " ") + "','" + asset.getAlignment().replace("'", " ") + "'," +
+//                "'" + asset.getMaterialInfoName().replace("'", " ") + "','" + asset.getMaterialInfoValue().replace("'", " ") + "','" + asset.getLineJson().replace("'", "\\'") + "','" + (asset.isUploaded() ? 1 : 0) + "','" + imei + "')");
+//        return sb.toString();
+
+    /// /        ContentValues contentValues = new ContentValues();
+    /// /        contentValues.put(AA_PAST_POINT_ID, asset.getPastPointId());
+    /// /        contentValues.put(ALL_SCHEME_ID, asset.getSchemeId());
+    /// /        contentValues.put(ALL_SCHEME_NAME, asset.getSchemeName());
+    /// /        contentValues.put(ALL_ESR_ID, asset.getEsrId());
+    /// /        contentValues.put(ALL_ESR_NAME, asset.getEsrName());
+    /// /        contentValues.put(ALL_POINT_ID, asset.getPointId());
+    /// /        contentValues.put(ALL_POINT_NAME, asset.getPointName());
+    /// /        contentValues.put(ALL_COMPONENT_ID, asset.getComponentId());
+    /// /        contentValues.put(ALL_COMPONENT_NAME, asset.getComponentName());
+    /// /        contentValues.put(ALL_LAT, asset.getLat());
+    /// /        contentValues.put(ALL_LNG, asset.getLng());
+    /// /        contentValues.put(A_REMARK, asset.getRemark());
+    /// /        contentValues.put(A_PHOTO, asset.getPhoto());
+    /// /        contentValues.put(AA_DATE, asset.getDate());
+    /// /        contentValues.put(ALL_DEPTH_COVER, asset.getDepthCover());
+    /// /        contentValues.put(ALL_DIAMETER, asset.getDiameter());
+    /// /        contentValues.put(ALL_MATERIAL, asset.getMaterial());
+    /// /        contentValues.put(ALL_ALIGNMENT, asset.getAlignment());
+    /// /        contentValues.put(ALL_MATERIAL_INFO_NAME, asset.getMaterialInfoName());
+    /// /        contentValues.put(ALL_MATERIAL_INFO_VALUE, asset.getMaterialInfoValue());
+    /// /        contentValues.put(ALL_LINE_JSON, asset.getLineJson());
+    /// /        contentValues.put(ALL_UPLOADED, asset.isUploaded() ? 1 : 0);
+    /// /        contentValues.put(ALL_IMEI, imei);
+    /// /        db.insert(T_ASSERT, null, contentValues);
+//    }
+    public void setAssetUploaded(long serial) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(ALL_UPLOADED, 1);
+        db.update(T_ASSERT, contentValues, ALL_SERIAL + "=" + serial, null);
+    }
+
+    public void setDIUploaded(long serial) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(ALL_UPLOADED, 1);
+        db.update(T_DAILY_INSPECTION, contentValues, ALL_SERIAL + "=" + serial, null);
+    }
+
+
+    public void CLEAR_UPLOADED_ASSETS() {
+        db.delete(T_ASSERT, ALL_UPLOADED + "=1", null);
+    }
+
+    public void CLEAR_UPLOADED_DI_NEW() {
+        db.delete(T_DAILY_INSPECTION, ALL_UPLOADED + "=1", null);
+    }
+
+    public void discardAsset(long serial) {
+        db.delete(T_ASSERT, ALL_SERIAL + "=" + serial, null);
+    }
+
+    public void discardDI(long serial, @NonNull Context context) {
+        db.delete(T_DAILY_INSPECTION, ALL_SERIAL + "=" + serial, null);
+        clearBase64(serial, T_DAILY_INSPECTION, context);
+//        db.delete(T_PHOTO, ALL_SERIAL + "=" + serial + " AND " + S_EXTRA1 + "='" + T_DAILY_INSPECTION + "'", null);
+    }
+
+    public void login(@NonNull Login login) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(L_USER_ID, login.getId());
+        contentValues.put(L_ROLE_ID, login.getRoleId());
+        contentValues.put(L_ROLE, login.getRole());
+        contentValues.put(L_NAME, login.getName());
+        contentValues.put(L_EMAIL, login.getEmail());
+        contentValues.put(L_MOBILE, login.getMobile());
+        contentValues.put(L_DISTRICT, login.getDistrict());
+        contentValues.put(L_DESIGNATION, login.getDesignation());
+        contentValues.put(L_MODULE, login.getModule());
+        contentValues.put(L_TOKEN, login.getToken());
+        Log.e("ABCD_I", "insert");
+        db.insert(T_LOGIN, null, contentValues);
+    }
+
+    public void updateProfile(@NonNull Login login) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(L_NAME, login.getName());
+        contentValues.put(L_EMAIL, login.getEmail());
+        contentValues.put(L_MOBILE, login.getMobile());
+        contentValues.put(L_DISTRICT, login.getDistrict());
+        contentValues.put(L_DESIGNATION, login.getDesignation());
+        contentValues.put(L_USER_ID, login.getId());
+        Log.e("ABCD_I", "update");
+        db.update(T_LOGIN, contentValues, null, null);
+    }
+
+    public Login getLogin() {
+        Login login = null;
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_LOGIN, null)) {
+            if (cursor.moveToNext()) {
+                login = new Login(cursor.getLong(cursor.getColumnIndexOrThrow(L_USER_ID)), cursor.getString(cursor.getColumnIndexOrThrow(L_NAME)), cursor.getString(cursor.getColumnIndexOrThrow(L_EMAIL)), cursor.getString(cursor.getColumnIndexOrThrow(L_MOBILE)), cursor.getString(cursor.getColumnIndexOrThrow(L_DISTRICT)), cursor.getString(cursor.getColumnIndexOrThrow(L_DESIGNATION)), cursor.getInt(cursor.getColumnIndexOrThrow(L_ROLE_ID)), cursor.getString(cursor.getColumnIndexOrThrow(L_ROLE)), cursor.getString(cursor.getColumnIndexOrThrow(L_TOKEN)), cursor.getString(cursor.getColumnIndexOrThrow(L_MODULE)));//, cursor.getString(cursor.getColumnIndexOrThrow(L_DID))
+            }
+        }
+        return login;
+    }
+
+    public void logout() {
+        db.delete(T_LOGIN, null, null);
+        db.delete(T_LAST_SYNC, null, null);
+    }
+
+    @Nullable
+    public String getLastTime(@NonNull Module module) {
+        try (Cursor cursor = db.rawQuery("SELECT " + S_NAME + " FROM " + T_LAST_SYNC + " WHERE " + S_KEY + "='" + module.code + "'", null)) {
+            if (cursor.moveToNext()) {
+                return cursor.getString(cursor.getColumnIndexOrThrow(S_NAME));
+            }
+        }
+        return null;
+    }
+
+    public void updateLastTime(@NonNull Module module) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(S_NAME, Utility.getCurrentTimeSync());
+        if (getLastTime(module) == null) {
+            contentValues.put(S_KEY, module.code);
+            db.insert(T_LAST_SYNC, null, contentValues);
+        } else {
+            db.update(T_LAST_SYNC, contentValues, S_KEY + "='" + module.code + "'", null);
+        }
+    }
+
+    public void resetLastTime(@NonNull Module module) {
+//        ContentValues contentValues = new ContentValues();
+//        contentValues.putNull(S_NAME);
+//        db.update(T_LOGIN, contentValues, S_KEY+"='"+module.name+"'", null);
+        db.delete(T_LAST_SYNC, S_KEY + "='" + module.code + "'", null);
+    }
+
+    public List<SpinnerItem> GET_ALIGNMENT() {
+        List<SpinnerItem> spinnerItems = new ArrayList<>();
+        spinnerItems.add(new SpinnerItem("Left", "Left"));
+        spinnerItems.add(new SpinnerItem("Right", "Right"));
+        spinnerItems.add(new SpinnerItem("Center", "Center"));
+        spinnerItems.add(new SpinnerItem("", "Other"));
+        return spinnerItems;
+    }
+
+    public String GET_REVIEW_DI_NEW(String id) {
+        try (Cursor cursor = db.rawQuery("SELECT " + S_NAME + " FROM " + T_SPINNER + " WHERE " + S_KEY + "=? AND " + S_SOURCE + "=?", new String[]{id, "QA_QC_REVIEW_DI"})) {
+            if (cursor.moveToNext()) {
+                return cursor.getString(cursor.getColumnIndexOrThrow(S_NAME));
+            }
+        }
+        return "N/A";
+    }
+
+    public void EXECUTE(@NonNull String q) {
+        if (!q.isEmpty()) db.execSQL(q);
+    }
+
+
+    /* DHARA */
+    public void CLEAR_DHARA_ESR_VILLAGE() {
+        clearSpinner("DHARA_ESR_VILLAGE");
+    }
+
+    public void ADD_DHARA_ESR_VILLAGE(@NonNull ESRVillage village) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(S_SOURCE, "DHARA_ESR_VILLAGE");
+        contentValues.put(S_KEY, village.getLgd());
+        contentValues.put(S_NAME, village.getName());
+        contentValues.put(S_EXTRA1, village.getEsrId());
+        contentValues.put(S_EXTRA2, village.getEsr());
+        contentValues.put(S_EXTRA3, village.getR1());
+        contentValues.put(S_EXTRA4, village.getR2New());
+        contentValues.put(S_EXTRA5, village.getRemark());
+        contentValues.put(S_EXTRA6, village.getPhoto());
+        contentValues.put(S_EXTRA7, village.getR1Date().replace(" 00:00:00", "").replace("null", ""));
+        contentValues.put(S_EXTRA8, village.getDate());
+        contentValues.put(S_EXTRA9, village.getMeterStatusId());
+        contentValues.put(S_EXTRA10, village.getMeterStatusName());
+        contentValues.put(S_EXTRA11, village.getWs());
+        contentValues.put(S_EXTRA12, village.getEsrSUID());
+        db.insert(T_SPINNER, null, contentValues);
+//        this.spinner(village, "DHARA_ESR_VILLAGE", esr);
+    }
+
+    public List<ESRVillage> GET_DHARA_ESR_VILLAGE(String esrSUID, boolean today) {
+        String date = today ? Utility.getCurrentDate().second : Utility.getCurrentDate(1).second;
+        List<ESRVillage> esrVillages = new ArrayList<>();
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_SPINNER + " WHERE " + S_SOURCE + "='DHARA_ESR_VILLAGE' AND " + S_EXTRA12 + "=? AND " + S_EXTRA8 + "=? ORDER BY " + S_NAME, new String[]{String.valueOf(esrSUID), date})) {
+            while (cursor.moveToNext()) {
+                esrVillages.add(new ESRVillage(
+                        cursor.getInt(cursor.getColumnIndexOrThrow(S_KEY)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(S_NAME)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(S_EXTRA1)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA12)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA2)),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow(S_EXTRA3)),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow(S_EXTRA4)),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow(S_EXTRA11)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA5)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA6)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA7)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA8)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(S_EXTRA9)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA10))
+                ));
+            }
+        }
+        return esrVillages;
+//        return this.getSpinners("DHARA_ESR_VILLAGE", esr);
+    }
+
+    public void CLEAR_DHARA_COMPONENT() {
+        db.delete(T_DHARA_COMPONENT, null, null);
+    }
+
+    public void ADD_DHARA_COMPONENT(@NonNull DharaComponent dharaComponent) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DC_ID, dharaComponent.getId());
+        contentValues.put(DC_NAME, dharaComponent.getName());
+        contentValues.put(DC_TYPE, dharaComponent.getType());
+        contentValues.put(ALL_SCHEME_ID, dharaComponent.getSchemeId());
+        contentValues.put(ALL_SCHEME_NAME, dharaComponent.getScheme());
+        contentValues.put(DC_WTP_ID, dharaComponent.getWtpId());
+        contentValues.put(ALL_ESR_ID, dharaComponent.getEsrId());
+        contentValues.put(ALL_ESR_SUID, dharaComponent.getEsrSUID());
+        contentValues.put(ALL_ESR_NAME, dharaComponent.getEsr());
+        contentValues.put(DC_B_ID, dharaComponent.getBid());
+        contentValues.put(DC_B_NAME, dharaComponent.getBeneficiary());
+
+        contentValues.put(DC_METER_ID, dharaComponent.getMeterId());
+        contentValues.put(DC_METER_NAME, dharaComponent.getMeter());
+        contentValues.put(DC_R1, dharaComponent.getR1());
+        contentValues.put(DC_R2, dharaComponent.getR2New());
+        contentValues.put(DC_WS, dharaComponent.getWs());
+
+        contentValues.put(DC_REMARK, dharaComponent.getRemark());
+        contentValues.put(DC_PHOTO, dharaComponent.getPhoto());
+        contentValues.put(DC_R1_DATE, dharaComponent.getR1Date().replace(" 00:00:00", "").replace("null", ""));
+        contentValues.put(DC_DATE, dharaComponent.getDate());
+
+
+        contentValues.put(ALL_LAT, dharaComponent.getLat());
+        contentValues.put(ALL_LNG, dharaComponent.getLng());
+
+        contentValues.put(DC_METER_STATUS_ID, dharaComponent.getMeterStatusId());
+        contentValues.put(DC_METER_STATUS_NAME, dharaComponent.getMeterStatusName());
+
+        db.insert(T_DHARA_COMPONENT, null, contentValues);
+    }
+
+    @Nullable
+    public List<DharaComponent> GET_DHARA_COMPONENT(@NonNull String schemeId, boolean today) {
+        String date = today ? Utility.getCurrentDate().second : Utility.getCurrentDate(1).second;
+        List<DharaComponent> dharaComponents = new ArrayList<>();
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_DHARA_COMPONENT + " WHERE " + ALL_SCHEME_ID + "=? AND " + DC_DATE + "=? order by " + DC_TYPE + "," + DC_ID, new String[]{schemeId, date})) {
+            while (cursor.moveToNext()) {
+                dharaComponents.add(getDharaCByCursor(cursor, today));
+            }
+        }
+        return dharaComponents;
+    }
+
+    @NonNull
+    private DharaComponent getDharaCByCursor(@NonNull Cursor cursor, boolean today) {
+        String date = today ? Utility.getCurrentDate().second : Utility.getCurrentDate(1).second;
+        String dateNextPrevious = today ? Utility.getCurrentDate(1).second : Utility.getCurrentDate().second;
+        boolean allFilled = true;
+        int type = cursor.getInt(cursor.getColumnIndexOrThrow(DC_TYPE));
+        String esr_suid = cursor.getString(cursor.getColumnIndexOrThrow(ALL_ESR_SUID));
+        int id = cursor.getInt(cursor.getColumnIndexOrThrow(DC_ID));
+        int meter_id = cursor.getInt(cursor.getColumnIndexOrThrow(DC_METER_ID));
+        if (type == 3) {
+            //Check ALL Village Filled
+            try (Cursor cursor1 = db.rawQuery("SELECT count(*) AS total FROM " + T_SPINNER + " WHERE " + S_SOURCE + "='DHARA_ESR_VILLAGE' AND " + S_EXTRA12 + "=? AND " + S_EXTRA8 + "=? AND CAST(" + S_EXTRA4 + " AS REAL)<=0 AND CAST(" + S_EXTRA11 + " AS REAL)<=0", new String[]{String.valueOf(esr_suid), date})) {
+                if (cursor1.moveToNext()) {
+                    allFilled = cursor1.getInt(cursor1.getColumnIndexOrThrow("total")) == 0;
+                }
+            }
+        }
+
+        boolean isNPFilled = false;
+        //Check Today OR YESTERDAY is Filled.
+        try (Cursor cursor2 = db.rawQuery("SELECT " + DC_R2 + "," + DC_WS + " FROM " + T_DHARA_COMPONENT + " WHERE " + DC_ID + "=? AND " + DC_METER_ID + "=? AND " + DC_DATE + "=?", new String[]{String.valueOf(id), String.valueOf(meter_id), dateNextPrevious})) {
+            if (cursor2.moveToNext()) {
+                isNPFilled = (cursor2.getDouble(cursor2.getColumnIndexOrThrow(DC_R2)) > 0 || cursor2.getDouble(cursor2.getColumnIndexOrThrow(DC_WS)) > 0);
+            }
+        }
+
+        return new DharaComponent(
+                type,
+                id,
+                cursor.getString(cursor.getColumnIndexOrThrow(DC_NAME)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(ALL_SCHEME_ID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(ALL_SCHEME_NAME)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(DC_WTP_ID)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(ALL_ESR_ID)),
+                esr_suid,
+                cursor.getString(cursor.getColumnIndexOrThrow(ALL_ESR_NAME)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(DC_B_ID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(DC_B_NAME)),
+                meter_id,
+                cursor.getString(cursor.getColumnIndexOrThrow(DC_METER_NAME)),
+                cursor.getDouble(cursor.getColumnIndexOrThrow(DC_R1)),
+                cursor.getDouble(cursor.getColumnIndexOrThrow(DC_R2)),
+                cursor.getDouble(cursor.getColumnIndexOrThrow(DC_WS)),
+                cursor.getString(cursor.getColumnIndexOrThrow(DC_REMARK)),
+                cursor.getString(cursor.getColumnIndexOrThrow(DC_PHOTO)),
+                cursor.getString(cursor.getColumnIndexOrThrow(DC_R1_DATE)),
+                cursor.getString(cursor.getColumnIndexOrThrow(DC_DATE)),
+                cursor.getDouble(cursor.getColumnIndexOrThrow(ALL_LAT)),
+                cursor.getDouble(cursor.getColumnIndexOrThrow(ALL_LNG)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(DC_METER_STATUS_ID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(DC_METER_STATUS_NAME)),
+                allFilled,
+                isNPFilled
+        );
+    }
+
+
+    @Nullable
+    public DharaComponent GET_DHARA_COMPONENT_ONLY(int mappingId, int meterId, boolean today) {
+        String date = today ? Utility.getCurrentDate().second : Utility.getCurrentDate(1).second;
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_DHARA_COMPONENT + " WHERE " + DC_ID + "=? AND " + DC_METER_ID + "=? AND " + DC_DATE + "=?", new String[]{String.valueOf(mappingId), String.valueOf(meterId), date})) {
+            if (cursor.moveToNext()) {
+                return getDharaCByCursor(cursor, today);
+            }
+        }
+        return null;
+    }
+
+
+    @NonNull
+    public List<SpinnerItem> GET_DHARA_SCHEME() {
+        List<SpinnerItem> spinnerItems = new ArrayList<>();
+        try (Cursor cursor = db.rawQuery("SELECT DISTINCT " + ALL_SCHEME_ID + "," + ALL_SCHEME_NAME + " FROM " + T_DHARA_COMPONENT, null)) {// ORDER BY S_NAME
+            while (cursor.moveToNext()) {
+                spinnerItems.add(new SpinnerItem(cursor.getString(cursor.getColumnIndexOrThrow(ALL_SCHEME_ID)), cursor.getString(cursor.getColumnIndexOrThrow(ALL_SCHEME_NAME))));
+            }
+        }
+        return spinnerItems;
+    }
+
+    public void ADD_READING(@NonNull Context context, @NonNull Reading reading, boolean isVillage) throws Exception {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DH_MAPPING_ID, reading.getMappingId());
+        contentValues.put(DH_MAIN_ID, reading.getMainId());
+        contentValues.put(DH_TYPE_ID, reading.getTypeId());
+        contentValues.put(DH_TYPE_NAME, reading.getType());
+        contentValues.put(DH_METER_ID, reading.getMeterId());
+        contentValues.put(DH_START_READING, reading.getR1());
+        contentValues.put(DH_END_READING, reading.getR2());
+        contentValues.put(DH_TOTAL_WS, reading.getWs());
+        contentValues.put(DH_END_REMARK, reading.getRemark());
+        contentValues.put(DH_END_LAT, reading.getLatLng().latitude);
+        contentValues.put(DH_END_LNG, reading.getLatLng().longitude);
+        contentValues.put(DH_END_DATE, reading.getDate());
+        contentValues.put(DH_END_TIME, reading.getTime());
+
+        contentValues.put(DH_METER_STATUS_ID, reading.getMeterStatusId());
+        contentValues.put(DH_METER_STATUS_NAME, reading.getMeterStatusName());
+
+        long id = 0;
+        if (isVillage) {
+            contentValues.put(DH_LGD, reading.getLgdId());
+            contentValues.put(DH_VILLAGE, reading.getVillage());
+
+            try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_DHARA + " WHERE " + DH_MAPPING_ID + "=? AND " + DH_LGD + "=? AND " + DH_END_DATE + "=?", new String[]{String.valueOf(reading.getMappingId()), String.valueOf(reading.getLgdId()), reading.getDate()})) {// ORDER BY S_NAME
+                if (cursor.moveToNext()) {
+                    id = cursor.getInt(cursor.getColumnIndexOrThrow(ALL_SERIAL));
+                }
+            }
+        } else {
+            contentValues.put(DH_LGD, 0);
+            contentValues.put(DH_VILLAGE, "");
+            try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_DHARA + " WHERE " + DH_MAPPING_ID + "=? AND " + DH_METER_ID + "=? AND " + DH_LGD + "=0 AND " + DH_END_DATE + "=?", new String[]{String.valueOf(reading.getMappingId()), String.valueOf(reading.getMeterId()), reading.getDate()})) {// ORDER BY S_NAME
+                if (cursor.moveToNext()) {
+                    id = cursor.getInt(cursor.getColumnIndexOrThrow(ALL_SERIAL));
+                }
+            }
+        }
+
+        if (id > 0) {
+            db.update(T_DHARA, contentValues, ALL_SERIAL + "=?", new String[]{String.valueOf(id)});
+            clearBase64(id, T_DHARA, context);
+            saveBase64(id, reading.getPhoto(), T_DHARA, context, (success, jsonArray, base64) -> {
+            });
+        } else {
+            id = db.insert(T_DHARA, null, contentValues);
+            if (id == -1) {
+                throw new Exception("Something is wrong.");
+            }
+            saveBase64(id, reading.getPhoto(), T_DHARA, context, (success, jsonArray, base64) -> {
+            });
+        }
+        if (!isVillage) {
+            if (reading.readings != null && !reading.readings.isEmpty()) {
+                for (int i = 0; i < reading.readings.size(); i++) {
+                    Reading r = reading.readings.get(i);
+                    ADD_READING(context, r, true);
+                }
+            }
+        }
+    }
+
+//    public void CLEAR_DHARA_READING(long serial, @NonNull Context context) {
+//        db.delete(T_DHARA, ALL_SERIAL + "=" + serial, null);
+//        clearBase64(serial, T_DHARA, context);
+//    }
+
+
+    public void GET_DHARA_READING(@NonNull Context context, int mapping_id, int meter_id, int lgd, boolean today, @NonNull OnDataReceived<Reading> onDataReceived) {
+        String date = today ? Utility.getCurrentDate().second : Utility.getCurrentDate(1).second;
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_DHARA + " WHERE " + DH_MAPPING_ID + "=? AND " + DH_METER_ID + "=? AND " + DH_LGD + "=? AND " + DH_END_DATE + "=?", new String[]{String.valueOf(mapping_id), String.valueOf(meter_id), String.valueOf(lgd), date})) {// ORDER BY S_NAME
+            if (cursor.moveToNext()) {
+                long id = cursor.getInt(cursor.getColumnIndexOrThrow(ALL_SERIAL));
+
+                Reading reading = new Reading(
+                        cursor.getInt(cursor.getColumnIndexOrThrow(DH_MAPPING_ID)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(DH_MAIN_ID)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(DH_TYPE_ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(DH_TYPE_NAME)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(DH_METER_ID)),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow(DH_START_READING)),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow(DH_END_READING)),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow(DH_TOTAL_WS)),
+                        new LatLng(cursor.getDouble(cursor.getColumnIndexOrThrow(DH_END_LAT)),
+                                cursor.getDouble(cursor.getColumnIndexOrThrow(DH_END_LNG))),
+                        cursor.getString(cursor.getColumnIndexOrThrow(DH_END_REMARK)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(DH_END_DATE)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(DH_END_TIME)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(DH_METER_STATUS_ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(DH_METER_STATUS_NAME))
+                );
+                getBase64(id, T_DHARA, context, (success, jsonArray, base64) -> {
+                    if (success && jsonArray != null && jsonArray.length() > 0) {
+                        reading.setPhoto(jsonArray.optString(0));
+                        onDataReceived.get(true, reading);
+                    } else {
+                        onDataReceived.get(false, null);
+                    }
+                });
+            } else {
+                onDataReceived.get(false, null);
+            }
+        }
+    }
+
+
+    public void discardDharaReading(long mapping_id, int meter_id, boolean today, @NonNull Context context) {
+        String date = today ? Utility.getCurrentDate().second : Utility.getCurrentDate(1).second;
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_DHARA + " WHERE " + DH_MAPPING_ID + "=? AND " + DH_METER_ID + "=? AND " + DH_END_DATE + "=?", new String[]{String.valueOf(mapping_id), String.valueOf(meter_id), date})) {// ORDER BY S_NAME
+            while (cursor.moveToNext()) {
+                long id = cursor.getInt(cursor.getColumnIndexOrThrow(ALL_SERIAL));
+                clearBase64(id, T_DHARA, context);
+            }
+        }
+        db.delete(T_DHARA, DH_MAPPING_ID + "=? AND " + DH_METER_ID + "=? AND " + DH_END_DATE + "=?", new String[]{String.valueOf(mapping_id), String.valueOf(meter_id), date});
+    }
+    /* DHARA */
+
+
+    public void CLEAR_ISA_VILLAGE() {
+        clearSpinner("ISA_VILLAGE");
+    }
+
+    public void CLEAR_ISA_ACTIVITY() {
+        clearSpinner("ISA_ACTIVITY");
+    }
+
+    public List<SpinnerItem> GET_ISA_ACTIVITY() {
+        return this.getSpinners("ISA_ACTIVITY", false);
+    }
+
+
+    public void ADD_ISA_ACTIVITY(@NonNull SpinnerItem spinnerItem) {
+        this.spinner(spinnerItem, "ISA_ACTIVITY");
+    }
+
+    public void ADD_ISA_VILLAGE(@NonNull IsaInfo isaInfo) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(S_SOURCE, "ISA_VILLAGE");
+        contentValues.put(S_KEY, isaInfo.getVillageId());
+        contentValues.put(S_NAME, isaInfo.getVillage());
+        contentValues.put(S_EXTRA1, isaInfo.getPiuId());
+        contentValues.put(S_EXTRA2, isaInfo.getPiu());
+        contentValues.put(S_EXTRA3, isaInfo.getSchemeId());
+        contentValues.put(S_EXTRA4, isaInfo.getScheme());
+        contentValues.put(S_EXTRA5, isaInfo.getBlockId());
+        contentValues.put(S_EXTRA6, isaInfo.getBlock());
+        contentValues.put(S_EXTRA7, isaInfo.getGpId());
+        contentValues.put(S_EXTRA8, isaInfo.getGp());
+        db.insert(T_SPINNER, null, contentValues);
+    }
+
+    @Nullable
+    public IsaInfo getISAInfo() {
+        try (Cursor cursor = db.rawQuery("SELECT DISTINCT " + S_EXTRA1 + "," + S_EXTRA2 + "," + S_EXTRA3 + "," + S_EXTRA4 + "," + S_EXTRA5 + "," + S_EXTRA6 + " FROM " + T_SPINNER + " WHERE " + S_SOURCE + "='ISA_VILLAGE'", null)) {
+            if (cursor.moveToNext()) {
+                return new IsaInfo(cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA1)), cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA2)), cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA3)), cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA4)), cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA5)), cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA6)), "", "", "", "");
+            }
+        }
+        return null;
+    }
+
+    @NonNull
+    public List<SpinnerItem> getISAGp() {//@NonNull String block_id
+        List<SpinnerItem> spinnerItems = new ArrayList<>();
+//        try (Cursor cursor = db.rawQuery("SELECT DISTINCT " + S_EXTRA7 + "," + S_EXTRA8 + " FROM " + T_SPINNER + " WHERE " + S_SOURCE + "='ISA_VILLAGE' AND " + S_EXTRA5 + "=?", new String[]{block_id})) {// ORDER BY S_NAME
+        try (Cursor cursor = db.rawQuery("SELECT DISTINCT " + S_EXTRA7 + "," + S_EXTRA8 + " FROM " + T_SPINNER + " WHERE " + S_SOURCE + "='ISA_VILLAGE'", null)) {// ORDER BY S_NAME
+            while (cursor.moveToNext()) {
+                spinnerItems.add(new SpinnerItem(cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA7)), cursor.getString(cursor.getColumnIndexOrThrow(S_EXTRA8)), ""));
+            }
+        }
+        return spinnerItems;
+    }
+
+    @NonNull
+    public List<SpinnerItem> getISAVillage(@NonNull String gp_id) {
+        List<SpinnerItem> spinnerItems = new ArrayList<>();
+        try (Cursor cursor = db.rawQuery("SELECT DISTINCT " + S_KEY + "," + S_NAME + " FROM " + T_SPINNER + " WHERE " + S_SOURCE + "='ISA_VILLAGE' AND " + S_EXTRA7 + "=?", new String[]{gp_id})) {// ORDER BY S_NAME
+            while (cursor.moveToNext()) {
+                spinnerItems.add(new SpinnerItem(cursor.getString(cursor.getColumnIndexOrThrow(S_KEY)), cursor.getString(cursor.getColumnIndexOrThrow(S_NAME)), ""));
+            }
+        }
+        return spinnerItems;
+    }
+
+    public void ADD_ISA(@NonNull ISA isa, @NonNull List<String> documents, @NonNull List<String> images, boolean isOLD, @NonNull Context context) throws Exception {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(ALL_UPLOADED, isa.isUploaded() ? 1 : 0);
+        contentValues.put(N_GP_ID, isa.getGpId());
+        contentValues.put(N_GP_NAME, isa.getGp());
+        contentValues.put(N_VILLAGE_ID, isa.getVillageId());
+        contentValues.put(N_VILLAGE_NAME, isa.getVillage());
+        contentValues.put(N_ACTIVITY_ID, isa.getActivityId());
+        contentValues.put(N_ACTIVITY_NAME, isa.getActivity());
+        contentValues.put(N_REMARK, isa.getRemark());
+        contentValues.put(N_DATE_O_A, isa.getDate());
+        contentValues.put(N_DATE, isa.getCapture());
+        contentValues.put(N_IS_OLD, isOLD ? 1 : 0);
+        contentValues.put(ALL_LAT, isa.getLat());
+        contentValues.put(ALL_LNG, isa.getLng());
+        contentValues.put(ALL_ADDRESS, isa.getAddress());
+//        Log.d("DB_VALUES", contentValues.toString());
+
+        long id = db.insert(T_ISA_ACTIVITY, null, contentValues);
+        if (id == -1) {
+            throw new Exception("Something is wrong.");
+        }
+        for (String doc : documents) {
+            saveBase64(id, doc, T_ISA_ACTIVITY, PHOTO_FLAG.DOC, context, (success, jsonArray, base64) -> {
+
+            });
+        }
+        for (String img : images) {
+            saveBase64(id, img, T_ISA_ACTIVITY, PHOTO_FLAG.IMG, context, (success, jsonArray, base64) -> {
+
+            });
+        }
+    }
+
+    public interface OnDataReceived<T> {
+        void get(boolean success, @Nullable T data);
+    }
+
+    public void GET_ISA(@NonNull String token, long id, @NonNull Context context, @NonNull OnDataReceived<Data> onDataReceived) {
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_ISA_ACTIVITY + " WHERE " + ALL_SERIAL + "=" + id, null)) {// ORDER BY S_NAME
+            if (cursor.moveToNext()) {
+                final Data data = new Data();
+                data.put(Utility.E_TOKEN, token);
+                data.put("gp_code", cursor.getString(cursor.getColumnIndexOrThrow(N_GP_ID)));
+                data.put("vill_cd", cursor.getString(cursor.getColumnIndexOrThrow(N_VILLAGE_ID)));
+                data.put("activity_id", cursor.getString(cursor.getColumnIndexOrThrow(N_ACTIVITY_ID)));
+                data.put("remark", cursor.getString(cursor.getColumnIndexOrThrow(N_REMARK)));
+                data.put("capture_dt", cursor.getString(cursor.getColumnIndexOrThrow(N_DATE)));
+                data.put("activity_dt", cursor.getString(cursor.getColumnIndexOrThrow(N_DATE_O_A)));
+                data.put("is_old_activity", cursor.getInt(cursor.getColumnIndexOrThrow(N_IS_OLD)));
+                data.put("lat", cursor.getDouble(cursor.getColumnIndexOrThrow(ALL_LAT)));
+                data.put("longt", cursor.getDouble(cursor.getColumnIndexOrThrow(ALL_LNG)));
+                data.put("address", cursor.getString(cursor.getColumnIndexOrThrow(ALL_ADDRESS)));
+                data.put("doc_ext", "pdf");
+                getBase64(id, T_ISA_ACTIVITY, PHOTO_FLAG.DOC, context, (success, jsonArray, base64) -> {
+                    if (!success) {
+                        jsonArray = new JSONArray();
+                    }
+                    data.put("doc_path", jsonArray);
+                    getBase64(id, T_ISA_ACTIVITY, PHOTO_FLAG.IMG, context, (success1, jsonArray1, base641) -> {
+                        if (!success1) {
+                            jsonArray1 = new JSONArray();
+                        }
+                        data.put("photo_path", jsonArray1);
+                        onDataReceived.get(true, data);
+                    });
+                });
+            } else {
+                onDataReceived.get(false, null);
+            }
+        }
+    }
+
+    public void discardISA(long serial, @NonNull Context context) {
+        db.delete(T_ISA_ACTIVITY, ALL_SERIAL + "=" + serial, null);
+        clearBase64(serial, T_ISA_ACTIVITY, context);
+    }
+
+    public void setISAUploaded(long serial) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(ALL_UPLOADED, 1);
+        db.update(T_ISA_ACTIVITY, contentValues, ALL_SERIAL + "=" + serial, null);
+    }
+
+    @NonNull
+    public List<ISA> GET_ISA() {
+        List<ISA> isa = new ArrayList<>();
+        try (Cursor cursor = db.rawQuery("SELECT * FROM " + T_ISA_ACTIVITY, null)) {// ORDER BY S_NAME
+            while (cursor.moveToNext()) {
+                long id = cursor.getLong(cursor.getColumnIndexOrThrow(ALL_SERIAL));
+                int countD = getBase64Count(id, T_ISA_ACTIVITY, PHOTO_FLAG.DOC);
+                int countI = getBase64Count(id, T_ISA_ACTIVITY, PHOTO_FLAG.IMG);
+                isa.add(new ISA(
+                        id,
+                        cursor.getInt(cursor.getColumnIndexOrThrow(ALL_UPLOADED)) == 1,
+                        cursor.getString(cursor.getColumnIndexOrThrow(N_GP_ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(N_GP_NAME)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(N_VILLAGE_ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(N_VILLAGE_NAME)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(N_ACTIVITY_ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(N_ACTIVITY_NAME)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(N_REMARK)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(N_DATE_O_A)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(N_DATE)),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow(ALL_LAT)),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow(ALL_LNG)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(ALL_ADDRESS)),
+                        countD > 0,
+                        countI > 0
+                ));
+            }
+        }
+        return isa;
+    }
+
+
+    public void getISABase64(long id, @NonNull PHOTO_FLAG photoFlag, int offset, @NonNull Context context, @NonNull OnSubmit onSubmit) {
+        getBase64(id, T_ISA_ACTIVITY, photoFlag, offset, context, onSubmit);
+    }
+
+
+    public void getISABase64(long id, @NonNull PHOTO_FLAG photoFlag, @NonNull Context context, @NonNull OnSubmit onSubmit) {
+        getBase64(id, T_ISA_ACTIVITY, photoFlag, context, onSubmit);
+    }
+
+    public interface OnSubmit {
+        void success(boolean success, @Nullable JSONArray jsonArray, @Nullable String base64);
+    }
+
+    private void saveBase64(long id, @NonNull String base64, @NonNull String table, @NonNull Context context, @NonNull OnSubmit onSubmit) {
+        saveBase64(id, base64, table, PHOTO_FLAG.DEFAULT, context, onSubmit);
+    }
+
+    private void saveBase64(long id, @NonNull String base64, @NonNull String table, @NonNull PHOTO_FLAG photoFlag, @NonNull Context context, @NonNull OnSubmit onSubmit) {
+//        Log.e("ABCD_SB64", "SAVE FILE INIT " + id);
+        Utility.saveFileInternal(base64, context, (name, e) -> {
+//            Log.e("ABCD_SB64", "SAVE FILE NAME " + name);
+            if (name == null) {
+                Utility.show(context, e);
+                onSubmit.success(false, null, null);
+                return;
+            }
+            ContentValues cv = new ContentValues();
+            cv.put(ALL_SERIAL, id);
+            cv.put(S_NAME, name);
+            cv.put(S_EXTRA1, table);
+            cv.put(S_EXTRA2, photoFlag.flag);
+            db.insert(T_PHOTO_NEW, null, cv);
+            onSubmit.success(true, null, null);
+//            Log.e("ABCD_SB64", "SAVE FILE END " + id + " IRC: " + irc);
+//            Log.e("ABCD_SB64", cv.toString());
+        });
+    }
+
+
+    private void getBase64(long id, @NonNull String table, @NonNull Context context, @NonNull OnSubmit onSubmit) {
+        getBase64(id, table, PHOTO_FLAG.DEFAULT, context, onSubmit);
+    }
+
+
+    private void getBase64(long id, @NonNull String table, @NonNull PHOTO_FLAG photoFlag, @NonNull Context context, @NonNull OnSubmit onSubmit) {
+        JSONArray jsonArray = new JSONArray();
+        try (Cursor c2 = db.rawQuery("SELECT " + S_NAME + " FROM " + T_PHOTO_NEW + " WHERE " + ALL_SERIAL + " = '" + id + "' AND " + S_EXTRA1 + "='" + table + "' AND " + S_EXTRA2 + "='" + photoFlag.flag + "'", null)) {// ORDER BY S_NAME
+            final int c = c2.getCount();
+            AtomicInteger ic = new AtomicInteger();
+            AtomicBoolean atomicBoolean = new AtomicBoolean();
+            atomicBoolean.set(true);
+            if (c > 0) {
+                while (c2.moveToNext()) {
+                    if (atomicBoolean.get()) {
+                        Utility.readFileInternal(c2.getString(c2.getColumnIndexOrThrow(S_NAME)), context, (name, e) -> {
+                            if (name == null) {
+                                onSubmit.success(false, null, null);
+                                atomicBoolean.set(false);
+                                return;
+                            }
+                            if (atomicBoolean.get()) {
+                                jsonArray.put(name);
+                                ic.getAndIncrement();
+                                if (ic.get() == c) {
+                                    if (atomicBoolean.get()) {
+                                        onSubmit.success(true, jsonArray, null);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            } else {
+                onSubmit.success(true, jsonArray, null);
+            }
+        }
+    }
+
+
+    private void getBase64(long id, @NonNull String table, @NonNull PHOTO_FLAG photoFlag, int offset, @NonNull Context context, @NonNull OnSubmit onSubmit) {
+        try (Cursor c2 = db.rawQuery("SELECT " + S_NAME + " FROM " + T_PHOTO_NEW + " WHERE " + ALL_SERIAL + " = '" + id + "' AND " + S_EXTRA1 + "='" + table + "' AND " + S_EXTRA2 + "='" + photoFlag.flag + "' LIMIT 1 OFFSET " + offset, null)) {// ORDER BY S_NAME
+            if (c2.moveToNext()) {
+                Utility.readFileInternal(c2.getString(c2.getColumnIndexOrThrow(S_NAME)), context, (name, e) -> {
+                    if (name == null) {
+                        onSubmit.success(false, null, null);
+                    } else {
+                        onSubmit.success(true, null, name);
+                    }
+                });
+//                return c2.getString(c2.getColumnIndexOrThrow(S_NAME));
+            }
+        }
+    }
+
+
+    private int getBase64Count(long id, @NonNull String table, @NonNull PHOTO_FLAG photoFlag) {
+        try (Cursor c2 = db.rawQuery("SELECT count(*) as total FROM " + T_PHOTO_NEW + " WHERE " + ALL_SERIAL + " = '" + id + "' AND " + S_EXTRA1 + "='" + table + "' AND " + S_EXTRA2 + "='" + photoFlag.flag + "'", null)) {// ORDER BY S_NAME
+            if (c2.moveToNext()) {
+                return c2.getInt(c2.getColumnIndexOrThrow("total"));
+            }
+        }
+        return 0;
+    }
+
+    private void clearBase64(long id, @NonNull String table, @NonNull Context context) {
+        clearBase64(id, table, PHOTO_FLAG.DEFAULT, context);
+    }
+
+    private void clearBase64(long id, @NonNull String table, @NonNull PHOTO_FLAG photoFlag, @NonNull Context context) {
+//        Log.e("ABCD_CB64", "DELETE FILE INIT " + id);
+        try (Cursor c2 = db.rawQuery("SELECT " + S_NAME + " FROM " + T_PHOTO_NEW + " WHERE " + ALL_SERIAL + " = '" + id + "' AND " + S_EXTRA1 + "='" + table + "' AND " + S_EXTRA2 + "='" + photoFlag.flag + "'", null)) {// ORDER BY S_NAME
+            if (c2.moveToNext()) {
+                String name = c2.getString(c2.getColumnIndexOrThrow(S_NAME));
+//                Log.e("ABCD_CB64", "DELETE DRIVE FILE " + name);
+                Utility.deleteFileInternal(name, context);
+//                return c2.getString(c2.getColumnIndexOrThrow(S_NAME));
+            }
+        }
+        db.delete(T_PHOTO_NEW, ALL_SERIAL + "=" + id + " AND " + S_EXTRA1 + "='" + table + "' AND " + S_EXTRA2 + "='" + photoFlag.flag + "'", null);
+//        Log.e("ABCD_CB64", "DELETE FILE END " + id + " NOAR: " + noar);
+    }
+
+    public static class PHOTO_FLAG {
+        public static final PHOTO_FLAG DEFAULT = new PHOTO_FLAG("");
+        public static final PHOTO_FLAG IMG = new PHOTO_FLAG("IMG");
+        public static final PHOTO_FLAG DOC = new PHOTO_FLAG("DOC");
+        String flag;
+
+        public PHOTO_FLAG(String flag) {
+            this.flag = flag;
+        }
+    }
+}

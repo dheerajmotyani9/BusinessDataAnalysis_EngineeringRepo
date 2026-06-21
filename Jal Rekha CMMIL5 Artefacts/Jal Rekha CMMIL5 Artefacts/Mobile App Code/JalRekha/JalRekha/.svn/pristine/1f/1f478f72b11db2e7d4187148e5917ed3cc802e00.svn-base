@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Jal Rekha</string>
+    <string name="google_map_key">AIzaSyDwL3eG7YILe9ePWonMWpgMGKpOfrfdy4s</string>
+    <string name="design_by">Designed, Developed and maintained by MPSSDI, MPSeDC</string>
+    <string name="mp_gov">Government of Madhya Pradesh</string>
+    <string name="please_check">Please Check #</string>
+    <string name="please_select">Please Select #</string>
+    <string name="next">Next</string>
+    <string name="register_mobile_number">Register Mobile Number</string>
+    <string name="sync_module">Sync Module</string>
+    <string name="sync_data">Sync Data</string>
+    <string name="approved_details">Approved Details</string>
+    <string name="approved_details_detail">View Approved Details</string>
+    <string name="work_monitoring">Work Monitoring</string>
+    <string name="sync_history">Sync History</string>
+<!--    <string name="mapping_asset">Mapping Asset</string>-->
+    <string name="assets_mapping">Assets Mapping</string>
+    <string name="water_quality">निर्मल</string>
+    <string name="water_quantity">धारा</string>
+
+
+    <string name="open_drawer">Open Drawer</string>
+    <string name="close_drawer">Close Drawer</string>
+
+    <string name="register_mobile_detail">Register your device and update details</string>
+    <string name="sync_data_detail">Synchronize data from server</string>
+    <string name="mapping_asset_detail">Mapping asset using map location</string>
+    <string name="upload_asset_detail">Upload the mapping data to server</string>
+    <string name="water_quality_detail">Water Quality Monitoring form</string>
+    <string name="water_quantity_detail">Water Quantity &amp; Pressure form</string>
+    <string name="complaint_detail">Complaint &amp; redressal report form</string>
+    <string name="confirmation">Confirmation</string>
+    <string name="do_you_really_want_to_sync_data">Do you really want to sync data</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="search_here">Search here</string>
+    <string name="device_registration">Device Registration</string>
+    <string name="designation">Designation</string>
+    <string name="select">-- SELECT --</string>
+    <string name="full_name">Full Name</string>
+    <string name="mobile_number">Mobile Number</string>
+    <string name="email_id">Email ID</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="i_am">I am</string>
+    <string name="request_update">Request Update</string>
+    <string name="please_wait">Please wait…</string>
+    <string name="gender">Gender</string>
+    <string name="information">Information</string>
+    <string name="update_profile_message">Your request has been successfully submitted to the administrator. \nThe changes will be only reflect after the approval of the administrator.</string>
+    <string name="scheme">Scheme</string>
+    <string name="esr">ESR Name</string>
+    <string name="component">Component</string>
+    <string name="photo">Photo</string>
+    <string name="please_capture_photo">Please capture photo</string>
+    <string name="please_capture_pdf">Please capture pdf</string>
+    <string name="please_capture_video">Please capture video</string>
+    <string name="review">Review</string>
+    <string name="save">Save</string>
+    <string name="location">Location</string>
+    <string name="saved_successfully">Saved successfully</string>
+    <string name="uploaded_successfully">Uploaded successfully</string>
+    <string name="success">Success</string>
+    <string name="discard">Discard</string>
+    <string name="upload">Upload</string>
+    <string name="assets_not_found_here">Assets Not Found Here</string>
+    <string name="asset_list">Asset List</string>
+    <string name="upload_discard">Upload/Discard</string>
+    <string name="ftk_kit_photo">FTK KIT Photo</string>
+    <string name="residual_ci_photo">Residual CI Photo</string>
+    <string name="esr_test_photo">ESR Test Photo</string>
+    <string name="value_as_per_color_code_1">Value as per color code 1</string>
+    <string name="value_as_per_color_code_2">Value as per color code 2</string>
+    <string name="add_new">Add New</string>
+    <string name="add_point">Add Point</string>
+    <string name="qualities_not_found_here">Water Quality Records Not Found Here</string>
+    <string name="quantities_not_found_here">Water Quantity &amp; Pressure Records Not Found Here</string>
+    <string name="complaints_not_found_here">Complaint Records Not Found Here</string>
+    <string name="quality_list">Water Quality List</string>
+    <string name="new_asset">New Asset</string>
+    <string name="new_quality">New Water Quality</string>
+    <string name="value_as_per_real_time_measurement">Value as per real time measurement</string>
+    <string name="pressure_photo">Pressure Photo</string>
+    <string name="quantity_video">Quantity Video</string>
+    <string name="new_quantity">New Quantity</string>
+    <string name="quantity_list">Quantity List</string>
+    <string name="play">Play</string>
+    <string name="complaint_photo">Complaint Photo</string>
+    <string name="redressal_photo">Redressal Photo</string>
+    <string name="remark">Remark</string>
+    <string name="remark_1">Remark 1</string>
+    <string name="remark_2">Remark 2</string>
+    <string name="complaint_video">Complaint Video</string>
+    <string name="complaint_photo_video">Complaint Photo/Video</string>
+    <string name="please_capture">Please capture</string>
+    <string name="select_an_option">Select an option</string>
+    <string name="new_complaint">New Complaint</string>
+    <string name="complaint_list">Complaint List</string>
+    <string name="water_supply">Water supply history</string>
+    <string name="water_supply_detail">Water supply history</string>
+    <string name="daily_water_supply">Daily Water Supply</string>
+    <string name="daily_water_supply_detail">Daily Water Supply</string>
+
+    <string name="inspection_request">Inspection Request</string>
+    <string name="inspection_request_detail">Inspection Request</string>
+
+    <string name="inspection_history">Inspection History</string>
+    <string name="inspection_history_detail">Inspection History</string>
+
+    <string name="re_inspection_request">Re-Inspection Requests</string>
+    <string name="re_inspection_request_detail">Re-Inspection Requests</string>
+
+    <string name="inspection_assigned_list">Inspection Assign List</string>
+    <string name="inspection_assigned_list_detail">Inspection Assign List</string>
+
+    <string name="password">Password</string>
+    <string name="re_enter_password">Re Enter Password</string>
+    <string name="logout">Logout</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="want_to_logout_from_app">Want to logout from app</string>
+    <string name="district">District</string>
+    <string name="district_piu">District (PIU)</string>
+    <string name="send_otp">Send OTP</string>
+    <string name="otp">OTP</string>
+    <string name="points">Points</string>
+    <string name="linked_with_last_point">Linked with last Point</string>
+    <string name="saving_data_locally">Saving data locally.</string>
+    <string name="pipe_diameter">Pipe Diameter</string>
+    <string name="material_type">Material Type</string>
+    <string name="all">All</string>
+
+    <string name="location_update_message">Press start button and walk from starting point to end point, after reaching end point press stop and see the location, if correct then save it, if not correct then press start again</string>
+    <string name="start">Start</string>
+    <string name="start_again">Start Again</string>
+    <string name="stop">Stop</string>
+    <string name="depth_cover">Depth / Cover</string>
+    <string name="give_pipe_parameter">Give Pipe Parameter</string>
+    <string name="start_traverse">Start Traverse</string>
+    <string name="traverse">Traverse</string>
+    <string name="traverse_msg">Traverse Path not found press "Start Traverse" Button &amp; walk from this point to another point</string>
+    <string name="restart">Restart</string>
+    <string name="pending">Pending</string>
+    <string name="point_name">Point Name</string>
+    <string name="resume">Resume</string>
+    <string name="alignment">Alignment</string>
+    <string name="alignment_name">Alignment Name</string>
+    <string name="forgot_password"><u>Forgot password ?</u></string>
+    <string name="forgot_password_q">Forgot password</string>
+    <string name="close">Close</string>
+    <string name="select_number_of_pipe">Select number of pipe</string>
+    <string name="one">1 (One)</string>
+    <string name="two">2 (Two)</string>
+    <string name="three">3 (Three)</string>
+    <string name="hand_n_pump">Hand Pump</string>
+    <string name="select_user_type">Select User Type</string>
+    <string name="assets_n_mapping">Assets Mapping</string>
+    <string name="hand_pump_login">Hand pump Login</string>
+    <string name="daily_inspection_login">Daily Inspection Login</string>
+    <string name="hand_pump_dashboard">Hand pump Dashboard</string>
+    <string name="login">Login</string>
+    <string name="username">Username</string>
+    <string name="map_view">Map View</string>
+    <string name="list_view">List View</string>
+    <string name="profile">Profile</string>
+    <string name="map_type">Map Type</string>
+    <string name="filter">Filter</string>
+    <string name="block">Block</string>
+    <string name="gram_panchayat">G.Panchayat</string>
+    <string name="village">Village</string>
+    <string name="apply">Apply</string>
+
+    <string name="open_street_map">Open Street Map</string>
+    <string name="topographic_map">Topographic Map</string>
+    <string name="satellite_map">Satellite Map</string>
+    <string name="no_map">NO Map</string>
+    <string name="option">Option</string>
+    <string name="hp_loc_name">Handpump / Location Name</string>
+    <string name="rfi">अनुश्रवण</string>
+    <string name="daily_inspection">Daily Inspection</string>
+    <string name="daily_inspection_dash">Daily Inspection Dashboard</string>
+    <string name="di_history">DI History</string>
+    <string name="view_history">View History</string>
+    <string name="view_history_detail">View History</string>
+    <string name="rfi_detail">RFI Information Forms</string>
+    <string name="daily_inspection_detail">Departmental daily inspection forms</string>
+    <string name="di_history_detail">Departmental daily inspection history</string>
+    <string name="yes">YES</string>
+    <string name="no">NO</string>
+    <string name="piu_name">PIU Name</string>
+    <string name="application_type">Application Type</string>
+    <string name="description_of_inspection">Description Of Inspection</string>
+    <string name="qa_and_qc_review"><![CDATA[QA & QC Review]]></string>
+    <string name="word_limit_500_max">Word Limit 500 Max</string>
+    <string name="qa_and_qc_comments"><![CDATA[QA & QC Comments]]></string>
+    <string name="address">Address / Location</string>
+    <string name="need_to_speak">Need to speak</string>
+    <string name="sorry_your_device_not_supported">Sorry your device not supported</string>
+    <string name="images">Images</string>
+    <string name="add_image">Add Image</string>
+    <string name="component_type">Component Type<font color="#FFDB412F"><b>*</b></font></string>
+    <string name="stages">Select Stages<font color="#FFDB412F"><b>*</b></font></string>
+    <string name="point">Point</string>
+    <string name="application_type_req">Application Type<font color="#FFDB412F"><b>*</b></font></string>
+    <string name="location_req">Location<font color="#FFDB412F"><b>*</b></font></string>
+    <string name="description_of_inspection_activity">Description of inspection activity<font color="#FFDB412F"><b>*</b></font></string>
+    <string name="inspection_date">Inspection date<font color="#FFDB412F"><b>*</b></font></string>
+    <string name="enclosure_photo">Enclosure Photo<font color="#FFDB412F"><b>*</b></font></string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="previous">Previous</string>
+
+    <string name="distance">Distance</string>
+    <string name="time">Time</string>
+    <string name="colon">:</string>
+    <string name="design_and_drawing"><![CDATA[Design & Drawing]]></string>
+    <string name="surveyed_data">Surveyed Data</string>
+
+
+    <string name="search_by_component">Search by component</string>
+    <string name="enter_depth_cover">Enter Depth Cover</string>
+    <string name="enter_pipe_diameter">Enter Pipe Diameter</string>
+    <string name="isa">सहभागिता</string>
+    <string name="isa_detail">सहभागिता module</string>
+    <string name="register_device">Register Device</string>
+    <string name="register">Register</string>
+    <string name="document">Document</string>
+    <string name="document_detail">Document <font size='11' color='red'>(PDF Only, Max 5MB)</font></string>
+    <string name="sync_your_module_data_here">Sync your module data here.</string>
+    <string name="module_and_last_sync">Module &amp; Last Sync</string>
+    <string name="sync">Sync</string>
+    <string name="red_text_show_last_sync">*** RED text show last sync</string>
+    <string name="add_activity">Add Activity</string>
+    <string name="star">*</string>
+    <string name="activity">Activity</string>
+    <string name="date">Date</string>
+    <string name="no_activity">No Activities</string>
+    <string name="no_activity_detail">ISA Activity not found, please add one by clicking on the + button.</string>
+
+    <string name="no_daily_inspection">No Daily Inspection</string>
+    <string name="no_daily_inspection_detail">Daily Inspection not found, please add one by clicking on the + button.</string>
+    <string name="tpia_name">TPIA Name</string>
+    <string name="sqc_name">SQC Name</string>
+    <string name="contractor_name">Contractor Name</string>
+    <string name="name">Name</string>
+    <string name="complaint_list_detail">Departmental daily inspection complaint</string>
+    <string name="add_contractor">Add Contractor</string>
+    <string name="add_contractor_detail">Register your contractor</string>
+    <string name="download">Download</string>
+    <string name="accuracy">Accuracy</string>
+    <string name="re_send_otp">Resend OTP</string>
+    <string name="contractor">Contractor</string>
+    <string name="fe_cm">FE / सहभागिता</string>
+    <string name="sarthak_fe">SARTHAK FE</string>
+    <string name="register_new_account"><u>Register new account</u></string>
+    <string name="fe_field_engineer_cm_community_mobiliser">FE - Field Engineer</string>
+    <string name="update_password">Update Password</string>
+    <string name="date_of_activity">Date of Activity</string>
+    <string name="type_of_activity">Type of Activity</string>
+    <string name="today_activity">Today Activity</string>
+    <string name="old_activity">Old Activity</string>
+    <string name="collection_point">Collection Point</string>
+    <string name="wtp_inlet_row_water">WTP Inlet (Row water)</string>
+    <string name="wtp_outlet_clear_water">WTP Outlet (Clear water)</string>
+    <string name="oht">OHT</string>
+    <string name="beneficiary">Beneficiary</string>
+    <string name="other">Other</string>
+    <string name="sample_photo">Sample Photo</string>
+    <string name="sample_id">Sample ID</string>
+    <string name="frc_test_photo">FRC Test Photo</string>
+    <string name="frc_test_result">FRC Test Result</string>
+    <string name="add_result">Add Result</string>
+
+    <string name="beneficiary_name">Beneficiary Name</string>
+    <string name="beneficiary_mobile_no">Beneficiary Mobile No.</string>
+    <string name="beneficiary_samagra_id">Beneficiary Samagra Id</string>
+
+
+    <string name="contact_person_name">Contact Person Name</string>
+    <string name="contact_person_mobile_no">Contact Person Mobile No.</string>
+    <string name="contact_person_designation">Contact Person Designation</string>
+    <string name="institute_other_name">Institute / Other Name</string>
+    <string name="near">Near</string>
+    <string name="far">Far</string>
+    <string name="distance_from_oht">Distance from OHT</string>
+    <string name="note_it_is_mandatory_to_take_result_for_both">Note: It is mandatory to take result for both</string>
+    <string name="add_reading">Add Reading</string>
+    <string name="update_reading">Update Reading</string>
+    <string name="start_reading_kl">Start Reading (KL)</string>
+    <string name="end_reading_kl">End Reading (KL)</string>
+    <string name="end_reading">End Reading</string>
+    <string name="current_day">Current Day</string>
+    <string name="previous_day">Previous Day</string>
+    <string name="meter_photo">Meter Photo</string>
+    <string name="total_supply_kl">Total Supply (KL)</string>
+    <string name="reading_0_0">0.0</string>
+    <string name="in_kl_kiloliter">in KiloLiter (KL)</string>
+    <string name="optional">(Optional)</string>
+    <string name="esr_inlet_reading">ESR Inlet Reading</string>
+    <string name="date_of_water_supply">Date of water supply</string>
+    <string name="view_reading">View Reading</string>
+    <string name="meter_name">Meter Name</string>
+
+    <string name="collection_point_entries">WTP Inlet (Raw water)|WTP Outlet (Clear water)|OHT|Beneficiary|Other</string>
+</resources>

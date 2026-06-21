@@ -1,0 +1,41 @@
+package mapitgis.jalnigam.core;
+
+import androidx.annotation.NonNull;
+
+import java.io.Serializable;
+
+public class SpinnerItem implements Serializable {
+    private final String keyString;
+    private final String value;
+    private final Object extra;
+
+    public SpinnerItem(String keyString, String value) {
+        this.keyString = keyString;
+        this.value = value;
+        this.extra = null;
+    }
+
+    public SpinnerItem(String keyString, String value, Object extra) {
+        this.keyString = keyString;
+        this.value = value;
+        this.extra = extra;
+    }
+
+    public Object getExtra() {
+        return extra;
+    }
+
+    public String getKeyString() {
+        return keyString;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return value;
+    }
+}

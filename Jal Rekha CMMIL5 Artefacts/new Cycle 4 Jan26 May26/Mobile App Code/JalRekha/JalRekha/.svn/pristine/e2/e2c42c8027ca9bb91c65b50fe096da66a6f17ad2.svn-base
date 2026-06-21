@@ -1,0 +1,23 @@
+package mapitgis.jalnigam.room.table
+
+import android.os.Parcelable
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+@Entity(tableName = "sopan_oht_master")
+data class SopanOHT(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @SerializedName("component_id") val componentId: String,
+    @SerializedName("scheme_id") val schemeId: String ,
+    @SerializedName("survey_uid") val surveyUid: String,
+    @SerializedName("oht_type") val ohtType: String,
+    @SerializedName("oht_ohsr_code") val ohtCode: String,
+    @SerializedName("oht_ohsr_nm") val ohtName: String
+) : Parcelable {
+    override fun toString(): String {
+        return "$ohtName-$ohtCode ($surveyUid)"
+    }
+}

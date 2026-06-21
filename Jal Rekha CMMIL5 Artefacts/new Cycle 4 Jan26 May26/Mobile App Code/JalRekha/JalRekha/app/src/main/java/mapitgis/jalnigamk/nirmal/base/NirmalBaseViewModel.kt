@@ -1,0 +1,73 @@
+package mapitgis.jalnigamk.nirmal.base
+
+import android.app.Application
+import android.content.Context
+import android.location.Location
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import mapitgis.jalnigamk.location.MLocListener
+import mapitgis.jalnigamk.location.MyLocation
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import mapitgis.jalnigamk.nirmal.collection.SessionManager
+import mapitgis.jalnigamk.nirmal.repository.NirmalRepository
+
+open class NirmalBaseViewModel(application: Application) : AndroidViewModel(application) {
+
+    val context: Context = application.applicationContext
+
+    protected var nirmalRepo= NirmalRepository(context)
+
+    val isContractorLogin = nirmalRepo.isContractor
+    val sessionManager by lazy { SessionManager(context) }
+
+    protected val _toastMessage = MutableLiveData<String>()
+    val toastMessage: LiveData<String> get() = _toastMessage
+
+    /*Current Location */
+    protected lateinit var myLocation: MyLocation
+    private val _locationAddress = MutableLiveData<String?>("Searching for location...")
+    val geoAddress: LiveData<String?> get() = _locationAddress
+
+    private val _lastLocation = MutableLiveData<Location?>()
+    val geoLocation: LiveData<Location?> get() = _lastLocation
+
+    val isLocationPermissionGranted: Boolean get() = myLocation.isLocationPermissionGranted()
+
+
+
+    fun initLocationRequest(context: Context){
+        myLocation = MyLocation(context,null,false,object : MLocListener {
+            override fun locationOn() {}
+
+            override fun currentLocation(location: Location) {
+                _lastLocation.value = location
+                viewModelScope.launch(Dispatchers.IO) {
+                    myLocation.getAddress(location)?.let {
+                        _locationAddress.postValue(it)
+                    }
+                }
+            }
+
+            override fun locationCancelled() {}
+        })
+    }
+
+    fun startLocationUpdates(){
+        if (this::myLocation.isInitialized) myLocation.startLocation()
+    }
+
+    fun stopLocationUpdates(){
+        if (this::myLocation.isInitialized) myLocation.endUpdates()
+    }
+
+    fun isLocationValid():Boolean{
+        if(geoLocation.value==null){
+            _toastMessage.value = "Searching for location..."
+            return false
+        }
+        return true
+    }
+}

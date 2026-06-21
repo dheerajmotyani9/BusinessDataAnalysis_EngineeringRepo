@@ -1,0 +1,71 @@
+package mapitgis.jalnigam.nirmal.screens.wqm_list
+
+import android.content.res.ColorStateList
+import android.net.Uri
+import android.os.Build
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.RecyclerView
+import mapitgis.jalnigam.R
+import mapitgis.jalnigam.databinding.ItemNirmalWqmBinding
+import mapitgis.jalnigam.nirmal.collection.WaterPointType
+import mapitgis.jalnigam.nirmal.database.dao.CombineSurveyTransaction
+import mapitgis.jalnigam.nirmal.database.table.NirmalWQMEntity
+import java.text.SimpleDateFormat
+import java.util.Locale
+
+class WQMAdapter(private val viewModel: WQMListVM,
+                 private val onUploadClick: (NirmalWQMEntity) -> Unit,
+                 private val onDiscardClick: (NirmalWQMEntity) -> Unit,
+                 private val onViewClick: (NirmalWQMEntity) -> Unit,
+                 private val onImageClick: (String?) -> Unit) : RecyclerView.Adapter<WQMAdapter.WQMViewHolder>() {
+
+    private var wqmList: List<CombineSurveyTransaction> = emptyList()
+
+    fun setData(newList: List<CombineSurveyTransaction>) {
+        wqmList = newList
+        notifyDataSetChanged()
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WQMViewHolder {
+        val binding: ItemNirmalWqmBinding = DataBindingUtil.inflate(
+            LayoutInflater.from(parent.context),
+            R.layout.item_nirmal_wqm,
+            parent,
+            false
+        )
+        return WQMViewHolder(binding)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    override fun onBindViewHolder(holder: WQMViewHolder, position: Int) {
+        holder.bind(wqmList[position])
+    }
+
+    override fun getItemCount(): Int = wqmList.size
+
+    inner class WQMViewHolder(private val binding: ItemNirmalWqmBinding) : RecyclerView.ViewHolder(binding.root) {
+
+        @RequiresApi(Build.VERSION_CODES.N)
+        fun bind(item: CombineSurveyTransaction) {
+            binding.wqm = item
+            binding.viewModel = viewModel
+
+            binding.tvWaterPoint.text = WaterPointType.getValue(item.allotType.toInt())?:""
+            binding.tvActivateDate.setValue(item.activeDate.split(" ")[0])
+
+            item.transaction?.let { wqm ->
+                binding.itemTransaction.btnUpload.setOnClickListener { onUploadClick(wqm) }
+                binding.itemTransaction.btnDiscard.setOnClickListener { onDiscardClick(wqm) }
+                binding.itemTransaction.btnView.setOnClickListener { onViewClick(wqm) }
+
+                binding.itemTransaction.sampleImg.setOnClickListener { onImageClick(wqm.sampleImgFilePath)}
+                binding.itemTransaction.frcImg.setOnClickListener { onImageClick(wqm.frcImgFilePath)}
+                binding.executePendingBindings()
+            }
+        }
+    }
+}

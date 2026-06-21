@@ -1,0 +1,42 @@
+package mapitgis.jalnigamk.nirmal.view
+
+import android.content.Context
+import android.os.Build
+import android.text.Html
+import android.util.AttributeSet
+import android.view.LayoutInflater
+import android.widget.LinearLayout
+import androidx.annotation.RequiresApi
+import mapitgis.jalnigam.R
+import mapitgis.jalnigam.databinding.ViewFormLabelBinding
+
+
+@RequiresApi(Build.VERSION_CODES.N)
+class FormLabel @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : LinearLayout(context, attrs, defStyleAttr) {
+
+    private val binding: ViewFormLabelBinding = ViewFormLabelBinding.inflate(LayoutInflater.from(context), this)
+
+    private var mandatory: Boolean = false
+
+    init {
+        attrs?.let {
+            val attributes = context.obtainStyledAttributes(it, R.styleable.FormLabel)
+            val label = attributes.getString(R.styleable.FormLabel_label)
+            mandatory = attributes.getBoolean(R.styleable.FormLabel_mandatory, false)
+            attributes.recycle()
+            setLabel(label, mandatory)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun setLabel(title: String?, isMandatory: Boolean = false) {
+        binding.tvLable.visibility = if (title.isNullOrEmpty()) GONE else VISIBLE
+        binding.tvLable.text = if (isMandatory) {
+            Html.fromHtml("$title <big><b><font color='#FF0000'>*</font></b></big>", Html.FROM_HTML_MODE_LEGACY)
+        } else {
+            title
+        }
+    }
+}

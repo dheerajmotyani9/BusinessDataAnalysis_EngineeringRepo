@@ -1,0 +1,1014 @@
+package mapitgis.jalnigam.dhara1;
+
+import android.annotation.SuppressLint;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.location.Location;
+import android.os.Bundle;
+import android.os.Looper;
+import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
+
+import com.bumptech.glide.Glide;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.util.Locale;
+import java.util.Objects;
+
+import mapitgis.jalnigam.BaseActivity;
+import mapitgis.jalnigam.BuildConfig;
+import mapitgis.jalnigam.ImgActivity;
+import mapitgis.jalnigam.R;
+import mapitgis.jalnigam.core.API;
+import mapitgis.jalnigam.core.ApiCaller;
+import mapitgis.jalnigam.core.Data;
+import mapitgis.jalnigam.core.Login;
+import mapitgis.jalnigam.core.Module;
+import mapitgis.jalnigam.core.SpinnerItem;
+import mapitgis.jalnigam.core.SqLite;
+import mapitgis.jalnigam.core.Utility;
+import mapitgis.jalnigam.databinding.ActivityAddReadingBinding;
+
+public class AddReadingActivity extends BaseActivity {
+    private MeterStatusAdapter meterStatusAdapter;
+    private ActivityAddReadingBinding binding;
+    private LatLng latLng, photoLatLng;
+    //    private Geocoder geocoder;
+    private File photoFile;
+    //    private String address;
+    private Login login;
+    private GoogleMap googleMap;
+    private boolean today;
+    private ESRVillageAdapter esrVillageAdapter;
+    private DharaComponent dharaComponent;
+    private ActivityResultLauncher<Intent> activityResultPhoto;
+
+    private ESRVillage esrVillage;
+    private int pos;
+
+//    private int doc;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        binding = ActivityAddReadingBinding.inflate(LayoutInflater.from(this));
+        setContentView(binding.getRoot());
+        setSupportActionBar(binding.appbar.toolbar);//findViewById(R.id.toolbar)
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
+        login = SqLite.instance(this).getLogin();
+
+        meterStatusAdapter = new MeterStatusAdapter(this, SqLite.instance(this).GET_DHARA_METER_STATUS()) {
+            @Override
+            void onChange(SpinnerItem spinnerItem) {
+                onChangeItem(spinnerItem, true);
+            }
+        };
+
+        binding.recyclerViewStatus.setAdapter(meterStatusAdapter);
+//        GridLayoutManager glm = (GridLayoutManager) binding.recyclerViewStatus.getLayoutManager();
+//        glm.setSpanSizeLookup();
+
+//        geocoder = new Geocoder(this, Locale.getDefault());
+        binding.mapView.setVisibility(View.VISIBLE);
+        binding.mapView.onCreate(savedInstanceState);
+        binding.mapView.onResume();// needed to get the map to display immediately
+        binding.mapView.getMapAsync(googleMap -> {
+
+            this.googleMap = googleMap;
+
+            LatLng latLng = new LatLng(20.5937, 78.9629);
+            CameraUpdate cameraPosition = CameraUpdateFactory.newLatLngZoom(latLng, 5);
+            googleMap.moveCamera(cameraPosition);
+            googleMap.animateCamera(cameraPosition);
+
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            this.googleMap.setMyLocationEnabled(true);
+            this.googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(23.473324, 77.947998), 6));
+
+//            TileProvider tileProvider = TileProviderFactory.getTileProvider(TileProviderFactory.LAYER_DIST);
+//            this.googleMap.addTileOverlay(new TileOverlayOptions().tileProvider(tileProvider));
+
+
+            this.googleMap.setOnCameraMoveListener(() -> binding.scrollView.requestDisallowInterceptTouchEvent(true));
+            this.googleMap.setOnCameraIdleListener(() -> binding.scrollView.requestDisallowInterceptTouchEvent(false));
+        });
+
+        binding.imageViewCurrentLocation.setVisibility(View.VISIBLE);
+        binding.imageViewCurrentLocation.setOnClickListener(v -> {
+            if (mFusedLocationClient == null) {
+//                show_message = true;
+//                binding.textViewLocation.setText("");
+                latLng = null;
+                RotateAnimation rotate = new RotateAnimation(0, 180, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+                rotate.setDuration(1000);
+                rotate.setInterpolator(new LinearInterpolator());
+                rotate.setRepeatCount(Animation.INFINITE);
+                rotate.setRepeatMode(Animation.ABSOLUTE);
+                binding.imageViewCurrentLocation.startAnimation(rotate);
+                buildGoogleApiClient();
+            }
+        });
+
+        today = getIntent().getBooleanExtra(Utility.G_KEY1, false);
+        dharaComponent = SqLite.instance(this).GET_DHARA_COMPONENT_ONLY(getIntent().getIntExtra(Utility.G_KEY, 0), getIntent().getIntExtra("METER_ID", 0), today);
+        if (dharaComponent != null) {
+            binding.textViewScheme.setText(dharaComponent.getScheme());
+            binding.textViewComponent.setText(dharaComponent.getName());
+            binding.textViewComponent.setTextColor(dharaComponent.getColor(this));
+            if (dharaComponent.getType() == 3) {
+                binding.textViewName.setVisibility(View.VISIBLE);
+                binding.viewESR1.setVisibility(View.VISIBLE);
+                binding.viewESR2.setVisibility(View.VISIBLE);
+                binding.textViewESRHead.setText(R.string.oht);
+                binding.textViewESR.setText(dharaComponent.getEsr());
+            } else if (dharaComponent.getType() == 4) {
+                binding.textViewName.setVisibility(View.GONE);
+
+                binding.viewESR1.setVisibility(View.VISIBLE);
+                binding.viewESR2.setVisibility(View.VISIBLE);
+                binding.textViewESRHead.setText(R.string.beneficiary);
+                binding.textViewESR.setText(dharaComponent.getBeneficiary());
+            } else if (dharaComponent.getType() == 2 && dharaComponent.getMeterId() > 0) {
+                binding.textViewName.setVisibility(View.GONE);
+
+                binding.viewESR1.setVisibility(View.VISIBLE);
+                binding.viewESR2.setVisibility(View.VISIBLE);
+                binding.textViewESRHead.setText(R.string.meter_name);
+                binding.textViewESR.setText(dharaComponent.getMeter());
+            } else {
+                binding.textViewName.setVisibility(View.GONE);
+                binding.viewESR1.setVisibility(View.GONE);
+                binding.viewESR2.setVisibility(View.GONE);
+                binding.textViewESR.setText("");
+            }
+
+
+            binding.editTextStartReading.setText(dharaComponent.getR1Reading());
+            if (dharaComponent.getR1Date().isEmpty() || dharaComponent.isFilled()) {
+                binding.textViewR1Date.setVisibility(View.GONE);
+                binding.textViewR1Date.setText("");
+            } else {
+                binding.textViewR1Date.setVisibility(View.VISIBLE);
+                binding.textViewR1Date.setText(dharaComponent.getR1DateDetail());
+            }
+
+            if (dharaComponent.isFilled()) {
+                meterStatusAdapter.enable = false;
+                binding.editTextStartReading.setEnabled(false);
+                binding.editTextEndReading.setEnabled(false);
+                binding.editTextTotalWS.setEnabled(false);
+                binding.editTextEndRemark.setEnabled(false);
+
+                meterStatusAdapter.setSelectedItem(dharaComponent.getMeterStatusId());
+//                onChangeItem(meterStatusAdapter.getSelectedItem(),false);
+
+                binding.editTextEndReading.setText(dharaComponent.getR2Reading());
+                binding.editTextTotalWS.setText(dharaComponent.getWSReading());
+                binding.editTextEndRemark.setText(dharaComponent.getRemarkWithNA());
+
+                Glide.with(this).load(dharaComponent.getFullPhotoURL()).into(binding.imageViewPhoto);
+                binding.imageViewPhoto.setTag(dharaComponent.getPhoto());
+
+                photoLatLng = dharaComponent.getLatLng();
+
+                if (dharaComponent.isAllFilled()) {
+                    binding.buttonSave.setVisibility(View.GONE);
+                    binding.linearLayoutButton.setVisibility(View.GONE);
+                } else {
+                    binding.buttonSave.setVisibility(View.VISIBLE);
+                    binding.buttonSave.setText(R.string.update_reading);
+                    binding.linearLayoutButton.setVisibility(View.GONE);
+                }
+            } else {
+                meterStatusAdapter.enable = true;
+                binding.editTextEndReading.setEnabled(true);
+                binding.editTextEndRemark.setEnabled(true);
+                binding.editTextEndReading.setText("");
+                binding.editTextEndRemark.setText("");
+//                updateTotalWS1();
+
+                binding.buttonSave.setText(R.string.add_reading);
+                binding.buttonSave.setVisibility(View.VISIBLE);
+                binding.linearLayoutButton.setVisibility(View.GONE);
+
+                onChangeItem(meterStatusAdapter.getSelectedItem(), false);
+                updateTotalWS1();
+                SqLite.instance(this).GET_DHARA_READING(this, dharaComponent.getId(), dharaComponent.getMeterId(), 0, "", today, (success, data) -> {
+                    if (success && data != null) {
+                        meterStatusAdapter.setSelectedItem(data.getMeterStatusId());
+                        binding.imageViewPhoto.setImageBitmap(Utility.bitmap(data.getPhoto()));
+                        binding.imageViewPhoto.setTag(data.getPhoto());
+                        photoLatLng = data.getLatLng();
+                        binding.editTextStartReading.setText(Utility.reading(data.getR1()));
+                        binding.editTextEndReading.setText(Utility.reading(data.getR2()));
+                        onChangeItem(meterStatusAdapter.getSelectedItem(), false);
+                        Log.e("ABCD", data.getWs() + "");
+                        binding.editTextTotalWS.setText(Utility.reading(data.getWs()));
+                        binding.editTextEndRemark.setText(data.getRemark());
+//                        binding.editTextEndReading.setEnabled(false);
+//                        binding.editTextEndRemark.setEnabled(false);
+
+                        binding.buttonSave.setText(R.string.update_reading);
+                        binding.linearLayoutButton.setVisibility(View.VISIBLE);
+                    }
+                });
+            }
+            binding.textViewTodayDate.setText(dharaComponent.getFDate());
+        } else {
+            Utility.show(this, "No Village assign to you.");
+            finish();
+            return;
+        }
+
+
+        activityResultPhoto = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK) {// && null != result.getData()
+                try {
+                    if (photoFile != null) {
+                        bitmap = Utility.getImageRotation(photoFile);
+                        //noinspection ResultOfMethodCallIgnored
+                        photoFile.delete();
+                        photoFile = null;
+
+                        printOnImage = true;
+                    } else {
+                        if (result.getData() != null && result.getData().getData() != null) {
+                            bitmap = Utility.getImageFromURI(result.getData().getData(), this);
+//                            addBitmapInPhoto();
+                        } else {
+                            Utility.show(this, "Something is wrong.");
+                        }
+                    }
+                    fetchPhoto = true;
+                    startDialog();
+                    buildGoogleApiClient();
+                } catch (Exception e) {
+                    Utility.show(this, e);
+                }
+            } else {
+                Utility.show(this, Utility.select(this, R.string.photo));
+            }
+        });
+
+        esrVillageAdapter = new ESRVillageAdapter(this) {
+            @Override
+            protected void onView(int pos, @NonNull ESRVillage dharaComponent) {
+
+            }
+
+            @Override
+            protected void onSelectPhoto(int pos, @NonNull ESRVillage esrVillage) {
+                onMySelectPhoto(pos, esrVillage);
+            }
+        };
+        if (dharaComponent.getType() == 3 || dharaComponent.getType() == 2) {
+            esrVillageAdapter.addAll(SqLite.instance(this).GET_DHARA_ESR_VILLAGE(dharaComponent, today));
+            for (int i = 0; i < esrVillageAdapter.getItemCount(); i++) {
+                ESRVillage esrVillage = esrVillageAdapter.getItem(i);
+                SqLite.instance(this).GET_DHARA_READING(this, dharaComponent.getId(), dharaComponent.getMeterId(), esrVillage.getLgd(), esrVillage.getHCd(), today, (success, data) -> {
+                    if (success && data != null) {
+                        setUploadEnable();
+                        esrVillage.setReading(data);
+//                        if(esrVillageAdapter.getItemCount() - 1 == i) {
+                        esrVillageAdapter.notifyDataSetChanged();
+//                        }
+                    }
+                });
+            }
+        }
+        binding.recyclerView.setAdapter(esrVillageAdapter);
+
+        binding.editTextEndReading.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+//                updateTotal(false);
+                updateTotalWS1();
+            }
+        });
+
+//        binding.editTextTotalWS.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable editable) {
+//                updateTotal(true);
+//            }
+//        });
+
+        binding.buttonSave.setOnClickListener(view -> {
+            String photo, remark;
+            double readingE, readingS, ws;
+            SpinnerItem meterStatus = meterStatusAdapter.getSelectedItem();
+            try {
+                readingS = Double.parseDouble(binding.editTextStartReading.getText().toString());
+                if (readingS < 0) {
+                    Utility.show(this, Utility.check(this, R.string.start_reading_kl));
+                    return;
+                }
+            } catch (Exception e) {
+                Utility.show(this, Utility.check(this, R.string.end_reading_kl));
+                return;
+            }
+            try {
+                readingE = Double.parseDouble(binding.editTextEndReading.getText().toString());
+                if (readingE < 0) {
+                    Utility.show(this, Utility.check(this, R.string.end_reading_kl));
+                    return;
+                }
+            } catch (Exception e) {
+                Utility.show(this, Utility.check(this, R.string.end_reading_kl));
+                return;
+            }
+
+            if (meterStatus.getKey() == 3) {
+                try {
+                    ws = Double.parseDouble(binding.editTextTotalWS.getText().toString());
+                    if (ws <= 0) {
+                        Utility.show(this, Utility.check(this, R.string.total_supply_kl));
+                        return;
+                    }
+                    if (readingE != readingS) {
+                        Utility.show(this, "Both reading must be same.");
+                        return;
+                    }
+                } catch (Exception e) {
+                    Utility.show(this, Utility.check(this, R.string.total_supply_kl));
+                    return;
+                }
+            } else {
+                ws = readingE - readingS;
+            }
+
+            remark = binding.editTextEndRemark.getText().toString();
+//            if (remark.isEmpty()) {
+//                Utility.show(this, Utility.check(this, R.string.remark));
+//                return;
+//            }
+
+            if (binding.imageViewPhoto.getTag() == null) {
+                Utility.show(this, Utility.select(this, R.string.meter_photo));
+                return;
+            }
+            photo = binding.imageViewPhoto.getTag().toString();
+
+
+            if (readingS > readingE) {
+                Utility.show(this, String.format(Locale.UK, "End Reading should be greater than or equal to %.1f", readingS));
+                return;
+            }
+
+            if (photoLatLng == null) {
+                Utility.show(this, Utility.check(this, R.string.location));
+                buildGoogleApiClient();
+                return;
+            }
+
+            try {
+                Reading reading1 = new Reading(
+                        dharaComponent,
+                        readingS,
+                        readingE,
+                        ws,
+                        photoLatLng,
+                        photo,
+                        remark, meterStatus.getKey(), meterStatus.getValue(), "");
+                if (dharaComponent.getType() == 3 || dharaComponent.getType() == 2) {
+                    for (int i = 0; i < esrVillageAdapter.getItemCount(); i++) {
+                        ESRVillage esrVillage = esrVillageAdapter.getItem(i);
+                        if ((esrVillage.getRE() > 0 || esrVillage.getWs() > 0 || !esrVillage.getPhoto().isEmpty()) && !esrVillage.isFilled()) {
+                            if (esrVillage.getRS() > esrVillage.getRE()) {
+                                Utility.show(this, String.format(Locale.UK, "%s [%s] End Reading should be greater than or equal to %.1f", esrVillage.getName(), esrVillage.getLgd(), esrVillage.getRS()));
+                                return;
+                            }
+                            if (esrVillage.getPhoto().isEmpty()) {
+                                Utility.show(this, String.format("%s [%s] ", esrVillage.getName(), esrVillage.getLgd()) + Utility.select(this, R.string.meter_photo));
+                                return;
+                            }
+                            SpinnerItem esrMS = esrVillage.meterStatusAdapter.getSelectedItem();
+                            reading1.readings.add(new Reading(
+                                    dharaComponent,
+                                    esrVillage.getRS(),
+                                    esrVillage.getRE(),
+                                    esrVillage.getWs(),
+                                    esrVillage.getLatLng(),
+                                    esrVillage.getPhoto(),
+                                    esrVillage.getRemark(),
+                                    esrVillage.getLgd(),
+                                    esrVillage.getName(), esrMS.getKey(), esrMS.getValue(), esrVillage.getHCd()));
+                        }
+                    }
+                }
+//                if(reading1.readings.isEmpty()){
+//                    Utility.show(this, "Minimum 1 Village Reading is compulsory");
+//                    return;
+//                }
+                SqLite.instance(this).ADD_READING(this, reading1, false);
+                AlertDialog.Builder dlgAlert = new AlertDialog.Builder(this);
+                dlgAlert.setMessage(R.string.saved_successfully);
+                dlgAlert.setTitle(R.string.success);
+                dlgAlert.setPositiveButton(R.string.ok, (dialog, which) -> restartActivity());
+                dlgAlert.setCancelable(true);
+                dlgAlert.create().show();
+            } catch (Exception e) {
+                Utility.show(this, e);
+            }
+        });
+
+        binding.imageViewPhoto.setOnClickListener(v -> {
+            if (dharaComponent.isFilled()) {
+                ImgActivity.openImage(this, dharaComponent.getFullPhotoURL(), getString(R.string.photo), 2);
+            } else {
+                this.pos = -1;
+                this.esrVillage = null;
+                getImageDialog();
+            }
+        });
+
+        binding.buttonDiscard.setOnClickListener(view -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(AddReadingActivity.this);
+            builder.setTitle("Are you sure?");
+            builder.setMessage("Do you really want to discard");
+            builder.setNegativeButton(R.string.cancel, (d, v) -> d.dismiss());
+            builder.setPositiveButton(R.string.discard, null);
+            builder.setCancelable(false);
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+            alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+                SqLite.instance(this).discardDharaReading(dharaComponent.getId(), dharaComponent.getMeterId(), today, this);
+                alertDialog.dismiss();
+                Utility.show(this, "Successfully discard from local.");
+
+                restartActivity();
+            });
+        });
+
+        binding.buttonUpload.setOnClickListener(view -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(AddReadingActivity.this);
+            builder.setTitle("Are you sure?");
+            builder.setMessage("Do you really want to upload");
+            builder.setNegativeButton(R.string.cancel, (d, v) -> d.dismiss());
+            builder.setPositiveButton(R.string.upload, null);
+            builder.setCancelable(false);
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+            alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> uploadAll());
+        });
+    }
+
+    private void onChangeItem(@NonNull SpinnerItem spinnerItem, boolean isChange) {
+        if (isChange) {
+            binding.editTextStartReading.setText(dharaComponent.getR1Reading());
+        }
+        switch (spinnerItem.getKey()) {
+            case 2:
+                if (isChange) {
+                    binding.editTextEndReading.setText(dharaComponent.getR1Reading());
+                }
+
+                binding.editTextStartReading.setEnabled(true);
+                binding.editTextEndReading.setEnabled(true);
+                binding.editTextTotalWS.setEnabled(false);
+                break;
+            case 3:
+                if (isChange) {
+                    binding.editTextEndReading.setText(dharaComponent.getR1Reading());
+                }
+
+                binding.editTextStartReading.setEnabled(false);
+                binding.editTextEndReading.setEnabled(false);
+                binding.editTextTotalWS.setEnabled(true);
+                break;
+            case 4:
+                if (isChange) {
+                    binding.editTextEndReading.setText(dharaComponent.getR1Reading());
+                }
+
+                binding.editTextStartReading.setEnabled(false);
+                binding.editTextEndReading.setEnabled(false);
+                binding.editTextTotalWS.setEnabled(false);
+                break;
+            default:
+                if (isChange) {
+                    binding.editTextEndReading.setText("");
+                }
+
+                binding.editTextStartReading.setEnabled(false);
+                binding.editTextEndReading.setEnabled(true);
+                binding.editTextTotalWS.setEnabled(false);
+                break;
+        }
+        if (isChange) {
+            updateTotalWS1();
+        }
+    }
+
+    private void getImageDialog() {
+        final CharSequence[] items = {"Gallery", "Camera"};
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Upload Image");
+        builder.setItems(items, (dialog, which) -> {
+            if (which == 0) {
+                photoFile = null;
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                activityResultPhoto.launch(intent);
+            } else if (which == 1) {
+                Intent intent = Utility.getIntentForCameraFacing(false);
+                photoFile = Utility.createImageFile(AddReadingActivity.this);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(AddReadingActivity.this, String.format("%s.fileProvider", BuildConfig.APPLICATION_ID), photoFile));
+                activityResultPhoto.launch(intent);
+            }
+        });
+        builder.setNegativeButton("Cancel", (dialog, id) -> dialog.dismiss());
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private void setUploadEnable() {
+        binding.linearLayoutButton.setVisibility(View.VISIBLE);
+    }
+
+    private void onMySelectPhoto(int pos, @NonNull ESRVillage esrVillage) {
+        if (esrVillage.isFilled()) {
+            ImgActivity.openImage(AddReadingActivity.this, esrVillage.getFullPhotoURL(), getString(R.string.photo), 2);
+        } else {
+            this.pos = pos;
+            this.esrVillage = esrVillage;
+            getImageDialog();
+        }
+    }
+
+    private void uploadAll() {
+        String photo, remark;
+        double readingS, readingE, ws;
+        SpinnerItem meterStatus = meterStatusAdapter.getSelectedItem();
+        try {
+            readingS = Double.parseDouble(binding.editTextStartReading.getText().toString());
+            if (readingS < 0) {
+                Utility.show(this, Utility.check(this, R.string.start_reading_kl));
+                return;
+            }
+        } catch (Exception e) {
+            Utility.show(this, Utility.check(this, R.string.end_reading_kl));
+            return;
+        }
+
+        try {
+            readingE = Double.parseDouble(binding.editTextEndReading.getText().toString());
+            if (readingE < 0) {
+                Utility.show(this, Utility.check(this, R.string.end_reading_kl));
+                return;
+            }
+        } catch (Exception e) {
+            Utility.show(this, Utility.check(this, R.string.end_reading_kl));
+            return;
+        }
+
+        if (meterStatus.getKey() == 3) {
+            try {
+                ws = Double.parseDouble(binding.editTextTotalWS.getText().toString());
+                if (ws <= 0) {
+                    Utility.show(this, Utility.check(this, R.string.total_supply_kl));
+                    return;
+                }
+                if (readingE != readingS) {
+                    Utility.show(this, "Both reading must be same.");
+                    return;
+                }
+            } catch (Exception e) {
+                Utility.show(this, Utility.check(this, R.string.total_supply_kl));
+                return;
+            }
+        } else {
+            ws = readingE - readingS;
+        }
+
+        remark = binding.editTextEndRemark.getText().toString();
+//            if (remark.isEmpty()) {
+//                Utility.show(this, Utility.check(this, R.string.remark));
+//                return;
+//            }
+
+        if (binding.imageViewPhoto.getTag() == null) {
+            Utility.show(this, Utility.select(this, R.string.meter_photo));
+            return;
+        }
+        photo = binding.imageViewPhoto.getTag().toString();
+
+        if (readingS > readingE) {
+            Utility.show(this, String.format(Locale.UK, "End Reading should be greater than or equal to %.1f", readingS));
+            return;
+        }
+
+        if (photoLatLng == null) {
+            Utility.show(this, Utility.check(this, R.string.location));
+            buildGoogleApiClient();
+            return;
+        }
+
+        try {
+            Reading reading1 = new Reading(
+                    dharaComponent,
+                    readingS,
+                    readingE,
+                    ws,
+                    photoLatLng,
+                    photo,
+                    remark, meterStatus.getKey(), meterStatus.getValue(),"");
+            Data data = new Data();
+            data.put(Utility.E_TOKEN, login.getToken());
+            data.put("maping_id", reading1.getMappingId());
+            data.put("date", reading1.getDate());
+            data.put("time", reading1.getTime());
+            data.put("main_id", reading1.getMainId());
+            data.put("type", reading1.getType());
+            data.put("type_id", reading1.getTypeId());
+            data.put("meter_id", reading1.getMeterId());
+            data.put("start_reading", reading1.getR1());
+            data.put("end_reading", reading1.getR2());
+            data.put("water_supplied", reading1.getWs());
+            data.put("photo", reading1.getPhoto());
+            data.put("remark", reading1.getRemark());
+            data.put("lat", reading1.getLatLng().latitude);
+            data.put("lng", reading1.getLatLng().longitude);
+            data.put("meter_status_id", reading1.getMeterStatusId());
+            JSONArray jsonArray = new JSONArray();
+            if (dharaComponent.getType() == 3 || dharaComponent.getType() == 2) {
+                for (int i = 0; i < esrVillageAdapter.getItemCount(); i++) {
+                    ESRVillage esrVillage = esrVillageAdapter.getItem(i);
+                    if ((esrVillage.getRE() > 0 || esrVillage.getWs() > 0) && !esrVillage.isFilled()) {
+                        if (esrVillage.getRS() > esrVillage.getRE()) {
+                            Utility.show(this, String.format(Locale.UK, "%s [%s] End Reading should be greater than or equal to %.1f", esrVillage.getName(), esrVillage.getLgd(), esrVillage.getRS()));
+                            return;
+                        }
+                        if (esrVillage.getPhoto().isEmpty()) {
+                            Utility.show(this, String.format("%s [%s] ", esrVillage.getName(), esrVillage.getLgd()) + Utility.select(this, R.string.meter_photo));
+                            return;
+                        }
+                        SpinnerItem esrMS = esrVillage.meterStatusAdapter.getSelectedItem();
+//                        reading1.readings.add(new Reading(
+//                                dharaComponent,
+//                                esrVillage.getR(),
+//                                esrVillage.getLatLng(),
+//                                esrVillage.getPhoto(),
+//                                esrVillage.getRemark(),
+//                                esrVillage.getLgd(),
+//                                esrVillage.getName()));
+                        Data data1 = new Data();
+                        data1.put("lgd", esrVillage.getLgd());
+                        data1.put("habitation_cd", esrVillage.getHCd());
+                        data1.put("village", esrVillage.getName());
+                        data1.put("start_reading", esrVillage.getRS());
+                        data1.put("end_reading", esrVillage.getRE());
+                        data1.put("water_supplied", esrVillage.getWs());
+                        data1.put("photo", esrVillage.getPhoto());
+                        data1.put("remark", esrVillage.getRemark());
+                        data1.put("lat", esrVillage.getLatLng().latitude);
+                        data1.put("lng", esrVillage.getLatLng().longitude);
+                        data1.put("meter_status_id", esrMS.getKey());
+                        jsonArray.put(data1.getJsonObject());
+                    }
+                }
+            }
+            if (dharaComponent.getType() == 3 && jsonArray.length() == 0) {
+                Utility.show(this, "Minimum 1 Village Reading is compulsory");
+                return;
+            }
+            data.put("villages", jsonArray);
+
+
+            new ApiCaller(this, (response, key) -> {
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    if (jsonObject.getBoolean(Utility.SUCCESS)) {
+                        SqLite.instance(this).discardDharaReading(dharaComponent.getId(), dharaComponent.getMeterId(), today, this);
+//                        alertDialog.dismiss();
+                        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(this);
+                        dlgAlert.setMessage(jsonObject.getString(Utility.MESSAGE));
+                        dlgAlert.setTitle(R.string.success);
+                        dlgAlert.setCancelable(false);
+                        dlgAlert.setPositiveButton(R.string.ok, (dialog, which) -> {
+                            dialog.dismiss();
+                            Utility.syncDhara(null, Module.DHARA, this, login, null, view -> {
+                                //dharaComponent = SqLite.instance(this).GET_DHARA_COMPONENT_ONLY(dharaComponent.getId(), today);
+                                //getIntent().putExtra(Utility.G_KEY, dharaComponent);
+                                restartActivity();
+                            });
+                        });
+                        dlgAlert.setCancelable(true);
+                        dlgAlert.create().show();
+                    } else {
+                        Utility.show(this, jsonObject.getString(Utility.MESSAGE));
+                    }
+                } catch (Exception e) {
+                    Utility.show(this, e);
+                }
+            }, 1, data.toString(), getString(R.string.please_wait)).start(API.DHARA.SAVE);
+        } catch (Exception e) {
+            Utility.show(this, e);
+        }
+    }
+
+//    private void updateTotal(boolean fromWS) {
+//        try {
+//            double d1 = Double.parseDouble(binding.editTextStartReading.getText().toString());
+//            if (binding.editTextTotalWS.isEnabled() && fromWS) {
+//                double d2 = Double.parseDouble(binding.editTextTotalWS.getText().toString());
+//                binding.editTextEndReading.setText(Utility.reading(d2 <= 0 ? 0 : d2 + d1));
+//            } else if (!fromWS && !binding.editTextTotalWS.isEnabled()) {
+//                double d2 = Double.parseDouble(binding.editTextEndReading.getText().toString());
+//                binding.editTextTotalWS.setText(Utility.reading(d1 >= d2 ? 0 : d2 - d1));
+//            }
+//        } catch (Exception ignore) {
+//            (fromWS ? binding.editTextEndReading : binding.editTextTotalWS).setText(Utility.reading(0));
+//        }
+//    }
+
+    private void updateTotalWS1() {
+        try {
+            double d1 = Double.parseDouble(binding.editTextStartReading.getText().toString());
+            double d2 = Double.parseDouble(binding.editTextEndReading.getText().toString());
+            binding.editTextTotalWS.setText(Utility.reading(d1 >= d2 ? 0 : d2 - d1));
+        } catch (Exception ignore) {
+            binding.editTextTotalWS.setText(Utility.reading(0));
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!fetchPhoto) {
+            buildGoogleApiClient();
+        }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    /**
+     * @noinspection deprecation
+     */
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
+
+    private void connectGoogleClient() {
+        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+        int resultCode = googleAPI.isGooglePlayServicesAvailable(this);
+        if (resultCode == ConnectionResult.SUCCESS) {
+            mGoogleApiClient.connect();
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private GoogleApiClient mGoogleApiClient;
+    private FusedLocationProviderClient mFusedLocationClient;
+    private LocationCallback mLocationCallback;
+    private LocationRequest mLocationRequest;
+
+    @SuppressWarnings("deprecation")
+    private void buildGoogleApiClient() {
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        SettingsClient mSettingsClient = LocationServices.getSettingsClient(this);
+        mGoogleApiClient = new GoogleApiClient.Builder(this).addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+            @Override
+            public void onConnected(@Nullable Bundle bundle) {
+                mLocationRequest = new LocationRequest();
+                mLocationRequest.setInterval(2 * 1000);
+                mLocationRequest.setFastestInterval(2 * 1000);
+                mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+                LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+                builder.addLocationRequest(mLocationRequest);
+                builder.setAlwaysShow(true);
+                LocationSettingsRequest mLocationSettingsRequest = builder.build();
+
+                mSettingsClient.checkLocationSettings(mLocationSettingsRequest).addOnSuccessListener(locationSettingsResponse -> requestLocationUpdate()).addOnFailureListener(e -> {
+                    int statusCode = ((ApiException) e).getStatusCode();
+                    if (statusCode == LocationSettingsStatusCodes.RESOLUTION_REQUIRED) {
+                        try {
+                            int REQUEST_CHECK_SETTINGS = 214;
+                            ResolvableApiException rae = (ResolvableApiException) e;
+                            rae.startResolutionForResult(AddReadingActivity.this, REQUEST_CHECK_SETTINGS);
+                        } catch (Exception ignore) {
+                        }
+                        //                                case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                    }
+                }).addOnCanceledListener(() -> {
+
+                });
+            }
+
+            @Override
+            public void onConnectionSuspended(int i) {
+                connectGoogleClient();
+            }
+        }).addOnConnectionFailedListener(connectionResult -> buildGoogleApiClient()).addApi(LocationServices.API).build();
+
+        connectGoogleClient();
+
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                if (!locationResult.getLocations().isEmpty()) {
+                    Location location = locationResult.getLocations().get(0);
+                    if (location != null) {
+                        int accuracy = 100;
+                        if (Utility.isCorrectLocation(location, accuracy)) {
+                            latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                            showLocation();
+                            if (mFusedLocationClient != null) {
+                                mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+                                mFusedLocationClient = null;
+                            }
+                        } else {
+                            if (fetchPhoto) {
+                                buildGoogleApiClient();
+                            }
+                            latLng = null;
+//                        binding.textViewLocation.setText(String.format(String.format(Locale.UK, "Accuracy = %%s , must be less than %d meter", accuracy), location.getAccuracy()));
+                        }
+                    } else {
+                        if (fetchPhoto) {
+                            buildGoogleApiClient();
+                        }
+                    }
+                } else {
+                    if (fetchPhoto) {
+                        buildGoogleApiClient();
+                    }
+                }
+            }
+        };
+    }
+
+//    private boolean isCorrect(@NonNull Location location) {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//            if(location.isMock()) return false;
+//        }else{
+//            if(location.isFromMockProvider()) return false;
+//        }
+
+    /// /        return true;
+//        return location.getAccuracy() < 15;
+//    }
+    @SuppressLint("MissingPermission")
+    private void requestLocationUpdate() {
+        if (mFusedLocationClient != null)
+            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mFusedLocationClient != null) {
+            mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+            mFusedLocationClient = null;
+        }
+    }
+
+    private void showLocation() {
+//        address = "";
+//        try {
+//            if (latLng != null) {
+//                List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+//                assert addresses != null;
+//                String area = addresses.get(0).getSubLocality();
+//                String city = addresses.get(0).getLocality();
+//                String street = addresses.get(0).getAddressLine(0);
+//                address = area;
+//                address += " " + city;
+//                address += " " + street;
+//                address = address.replace("null", "").trim();
+//            }
+//        } catch (Exception ignored) {
+////            e1.printStackTrace();
+//        }
+//        binding.textViewLocation.setText(address.isEmpty() ? (latLng == null ? "Location is null." : ("Lat:" + latLng.latitude + " Long:" + latLng.longitude)) : address);
+        if (fetchPhoto) {
+            if (printOnImage) {
+                bitmap = Utility.addLatLongToBitmap(bitmap, latLng.latitude, latLng.longitude, login.getName(), login.getMobile());
+            }
+            addBitmapInPhoto();
+            stopDialog();
+        }
+        if (googleMap != null) {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+        }
+    }
+
+    private void addBitmapInPhoto() {
+        if (pos >= 0 && esrVillage != null) {
+            esrVillageAdapter.setImageAndLatLong(pos, latLng, bitmap);
+        } else {
+            photoLatLng = latLng;
+            fetchPhoto = false;
+            printOnImage = false;
+//            imageAdapter.add(bitmap);
+//            binding.imageViewPhoto.setVisibility(View.VISIBLE);
+            binding.imageViewPhoto.setImageBitmap(bitmap);
+            binding.imageViewPhoto.setTag(Utility.base64(bitmap));
+        }
+    }
+
+    private boolean fetchPhoto, printOnImage;
+    private Bitmap bitmap;
+
+
+//    @NonNull
+//    private byte[] readBytes(@NonNull InputStream inputStream) throws IOException {
+//        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+//        byte[] buffer = new byte[1024]; // Buffer size
+//        int len;
+//        while ((len = inputStream.read(buffer)) != -1) {
+//            byteBuffer.write(buffer, 0, len);
+//        }
+//        return byteBuffer.toByteArray();
+//    }
+
+
+    private Dialog dialog;
+
+    private void startDialog() {
+        stopDialog();
+        dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_api_call);
+        AppCompatTextView textView = dialog.findViewById(R.id.textView);
+        textView.setText(R.string.please_wait);
+        dialog.setCancelable(false);
+        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.show();
+    }
+
+    private void stopDialog() {
+        if (dialog != null && dialog.isShowing()) dialog.dismiss();
+    }
+}

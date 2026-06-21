@@ -1,0 +1,195 @@
+package mapitgis.jalnigam.dhara1;
+
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.maps.model.LatLng;
+
+import mapitgis.jalnigam.BuildConfig;
+import mapitgis.jalnigam.core.Utility;
+
+public class ESRVillage {
+    private final int lgd,esrId;
+    private final String name, esr,esrSUID;
+    private final double r1, r2, wsR;
+    private final String date,fDate,r1Date;
+
+    MeterStatusAdapter meterStatusAdapter;
+    private int meterStatusId;
+    private double rS,rE,ws;
+    private String remark,photo,meterStatusName;
+    private LatLng latLng;
+
+    boolean setUpdatedReading = false;
+
+    public ESRVillage(int lgd, String name, int esrId,String esrSUID, String esr, double r1, double r2,double ws, String remark, String photo,String r1Date,String date,int meterStatusId,String meterStatusName) {
+        this.lgd = lgd;
+        this.name = name;
+        this.esrId = esrId;
+        this.esrSUID = esrSUID;
+        this.esr = esr;
+        this.r1 = r1;
+        this.r2 = r2;
+        this.wsR = ws;
+        this.ws = ws;
+        this.remark = remark;
+        this.photo = photo;
+        this.r1Date = r1Date;
+        this.date = date;
+        this.fDate = Utility.getFormatedDate(date);
+        this.rS = r1;
+        this.rE = r2;
+        this.meterStatusId = meterStatusId;
+        this.meterStatusName = meterStatusName;
+    }
+
+    public int getMeterStatusId() {
+        return meterStatusId;
+    }
+
+    public String getMeterStatusName() {
+        return meterStatusName;
+    }
+
+    public void setReading(@NonNull Reading reading) {
+        this.rS = reading.getR1();
+        this.rE = reading.getR2();
+        this.ws = reading.getWs();
+        this.remark = reading.getRemark();
+        this.latLng = reading.getLatLng();
+        this.photo = reading.getPhoto();
+        this.meterStatusId = reading.getMeterStatusId();
+        this.meterStatusName = reading.getMeterStatusName();
+        this.setUpdatedReading = true;
+    }
+
+    public void setLatLng(LatLng latLng) {
+        this.latLng = latLng;
+    }
+
+    public LatLng getLatLng() {
+        return latLng;
+    }
+
+    public String getR1Date() {
+        return r1Date;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public double getRS() {
+        return rS;
+    }
+
+    public double getRE() {
+        return rE;
+    }
+
+    public double getWs() {
+        return ws;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getLgd() {
+        return lgd;
+    }
+
+    public int getEsrId() {
+        return esrId;
+    }
+
+    public String getEsr() {
+        return esr;
+    }
+
+    public String getEsrSUID() {
+        return esrSUID;
+    }
+
+    public double getR1() {
+        return r1;
+    }
+
+    public double getR2New() {
+        return r2;
+    }
+
+    public boolean isFilled() {
+        return (r2 > 0 || wsR > 0);
+    }
+
+    public void setRS(double rS) {
+        this.rS = rS;
+    }
+    public void setRE(double rE) {
+        this.rE = rE;
+    }
+
+    public String updateTWSAuto() {
+        ws = Math.max(rE - rS,0);
+        return getWSReading();
+    }
+
+    public String getWSReading() {
+        return Utility.reading(ws);
+    }
+
+    public String getR1Reading() {
+        return Utility.reading(r1);
+    }
+    public String getR2Reading() {
+        return Utility.reading(r2);
+    }
+
+    public String getRSReading() {
+        return Utility.reading(rS);
+    }
+    public String getREReading() {
+        return Utility.reading(rE);
+    }
+
+    public String getR1DateDetail() {
+        return String.format("Start Reading as date : %s", r1Date);
+    }
+
+
+    public String getFDate() {
+        return fDate;
+    }
+
+    public String getRemarkWithNA() {
+        return remark.isEmpty()?"N/A":remark;
+    }
+
+    public String getFullPhotoURL() {
+        return String.format("%s%s", BuildConfig.JAL_NIGAM_IMAGE,photo);
+    }
+
+    public void setWs(double ws) {
+        this.ws = ws;
+    }
+
+    //    public void setTWS(double tws) {
+//        this.rE = rS + tws;
+//    }
+}

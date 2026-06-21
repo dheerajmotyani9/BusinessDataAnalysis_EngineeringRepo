@@ -1,0 +1,445 @@
+package mapitgis.jalnigam.rfi.utils;
+
+import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.List;
+
+import mapitgis.jalnigam.R;
+import mapitgis.jalnigam.core.SpinnerItem;
+import mapitgis.jalnigam.rfi.adapter.ApplicationTypeAdapter;
+import mapitgis.jalnigam.rfi.adapter.ComponentTypeAdapter;
+import mapitgis.jalnigam.rfi.adapter.SelectBlockAdapter;
+import mapitgis.jalnigam.rfi.adapter.SelectGramAdapter;
+import mapitgis.jalnigam.rfi.adapter.SelectPointAdapter;
+import mapitgis.jalnigam.rfi.adapter.SelectVillageAdapter;
+import mapitgis.jalnigam.rfi.adapter.StagesAdapter;
+import mapitgis.jalnigam.room.table.ApplicationTypeTable;
+import mapitgis.jalnigam.room.table.BlockTable;
+import mapitgis.jalnigam.room.table.ComponentTypeTable;
+import mapitgis.jalnigam.room.table.GramTable;
+import mapitgis.jalnigam.room.table.PointTable;
+import mapitgis.jalnigam.room.table.VillageTable;
+
+public class CustomDialogHelper {
+
+    private Context context;
+
+    public CustomDialogHelper(Context context) {
+        this.context = context;
+    }
+
+
+    // TODO: 04-07-2024 : show component dialog
+    public void showStageDialog(DialogStagesListener listener, List<SpinnerItem> componentList, String selectedComponent) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        View view = inflater.inflate(R.layout.layout_bottom_sheet_recycler_view, null);
+
+
+        RecyclerView recyclerView = view.findViewById(R.id.layout_bottom_sheet_data_recycler_view);
+        TextView titleTv = view.findViewById(R.id.toolbar_title_text_view);
+        ImageView cancelIv = view.findViewById(R.id.tool_bar_navigation_icon_image_view);
+        EditText inputSearch = view.findViewById(R.id.input_search);
+
+
+        titleTv.setText("Select Stages");
+
+
+        AlertDialog dialog;
+        builder.setView(view);
+        dialog = builder.create();
+
+
+        StagesAdapter stagesAdapter = new StagesAdapter(context, componentList, (componentType, position) -> {
+            listener.onStagesSelected(componentType);
+            dialog.dismiss();
+        }, selectedComponent);
+
+        LinearLayoutManager manager = new LinearLayoutManager(context);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setAdapter(stagesAdapter);
+
+        cancelIv.setOnClickListener(v -> dialog.dismiss());
+
+        inputSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                stagesAdapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+
+        dialog.show();
+
+    }
+
+    // TODO: 04-07-2024 : show component dialog
+    public void showComponentTypeDialog(DialogComponentListener listener, List<ComponentTypeTable> componentList, String selectedComponent) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        View view = inflater.inflate(R.layout.layout_bottom_sheet_recycler_view, null);
+
+
+        RecyclerView recyclerView = view.findViewById(R.id.layout_bottom_sheet_data_recycler_view);
+        TextView titleTv = view.findViewById(R.id.toolbar_title_text_view);
+        ImageView cancelIv = view.findViewById(R.id.tool_bar_navigation_icon_image_view);
+        EditText inputSearch = view.findViewById(R.id.input_search);
+
+
+        titleTv.setText("Select Component Type");
+
+
+        AlertDialog dialog;
+        builder.setView(view);
+        dialog = builder.create();
+
+
+//        List<ComponentTypeTable> componentList = new ArrayList<>();
+        ComponentTypeAdapter componentTypeAdapter = new ComponentTypeAdapter(context, componentList, (componentType, position) -> {
+            listener.onComponentSelected(componentType);
+            dialog.dismiss();
+        }, selectedComponent);
+
+        LinearLayoutManager manager = new LinearLayoutManager(context);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setAdapter(componentTypeAdapter);
+
+        cancelIv.setOnClickListener(v -> dialog.dismiss());
+
+        inputSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                componentTypeAdapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+
+        dialog.show();
+
+    }
+
+    // TODO: 04-07-2024 : show block
+    public void showBlockDialog(DialogBlockListener listener, List<BlockTable> blockList, String selectedBlock) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        View view = inflater.inflate(R.layout.layout_bottom_sheet_recycler_view, null);
+
+        RecyclerView recyclerView = view.findViewById(R.id.layout_bottom_sheet_data_recycler_view);
+        TextView titleTv = view.findViewById(R.id.toolbar_title_text_view);
+        ImageView cancelIv = view.findViewById(R.id.tool_bar_navigation_icon_image_view);
+        EditText inputSearch = view.findViewById(R.id.input_search);
+
+        titleTv.setText("Select Block Type");
+
+        AlertDialog dialog;
+        builder.setView(view);
+        dialog = builder.create();
+
+
+        //   List<BlockTable> blockList = new ArrayList<>();
+        SelectBlockAdapter blockAdapter = new SelectBlockAdapter(context, blockList, (block, position) -> {
+            dialog.cancel();
+            listener.onBlockSelected(block);
+        }, selectedBlock);
+
+        LinearLayoutManager manager = new LinearLayoutManager(context);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setAdapter(blockAdapter);
+
+        inputSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                blockAdapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+        cancelIv.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+
+    }
+
+    // TODO: 04-07-2024 : show gram
+    public void showGramDialog(DialogGramListener listener, List<GramTable> gramList, String selectedGram) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        View view = inflater.inflate(R.layout.layout_bottom_sheet_recycler_view, null);
+
+        RecyclerView recyclerView = view.findViewById(R.id.layout_bottom_sheet_data_recycler_view);
+        TextView titleTv = view.findViewById(R.id.toolbar_title_text_view);
+        ImageView cancelIv = view.findViewById(R.id.tool_bar_navigation_icon_image_view);
+        EditText inputSearch = view.findViewById(R.id.input_search);
+
+        titleTv.setText("Select Gram Panchayat");
+
+        AlertDialog dialog;
+        builder.setView(view);
+        dialog = builder.create();
+
+
+        SelectGramAdapter blockAdapter = new SelectGramAdapter(context, gramList, (gram, position) -> {
+            dialog.cancel();
+            listener.onGramSelected(gram);
+        }, selectedGram);
+
+        LinearLayoutManager manager = new LinearLayoutManager(context);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setAdapter(blockAdapter);
+
+        inputSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                blockAdapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+        cancelIv.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+
+    }
+
+    // TODO: 04-07-2024 : show village
+    public void showVillageDialog(DialogVillageListener listener, List<VillageTable> villageList, String selectedVillage) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        View view = inflater.inflate(R.layout.layout_bottom_sheet_recycler_view, null);
+
+        RecyclerView recyclerView = view.findViewById(R.id.layout_bottom_sheet_data_recycler_view);
+        TextView titleTv = view.findViewById(R.id.toolbar_title_text_view);
+        ImageView cancelIv = view.findViewById(R.id.tool_bar_navigation_icon_image_view);
+        EditText inputSearch = view.findViewById(R.id.input_search);
+
+        titleTv.setText("Select Village");
+
+        AlertDialog dialog;
+        builder.setView(view);
+        dialog = builder.create();
+
+
+        SelectVillageAdapter villageAdapter = new SelectVillageAdapter(context, villageList, (village, position) -> {
+            dialog.cancel();
+            listener.onVillageSelected(village);
+        }, selectedVillage);
+
+        LinearLayoutManager manager = new LinearLayoutManager(context);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setAdapter(villageAdapter);
+
+
+        cancelIv.setOnClickListener(v -> dialog.dismiss());
+
+        inputSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                villageAdapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+
+        dialog.show();
+
+    }
+
+    // TODO: 04-07-2024 : show application
+    public void showApplicationTypeDialog(DialogApplicationTypeListener listener, List<ApplicationTypeTable> appList, String selectedType) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        View view = inflater.inflate(R.layout.layout_bottom_sheet_recycler_view, null);
+
+        RecyclerView recyclerView = view.findViewById(R.id.layout_bottom_sheet_data_recycler_view);
+        TextView titleTv = view.findViewById(R.id.toolbar_title_text_view);
+        ImageView cancelIv = view.findViewById(R.id.tool_bar_navigation_icon_image_view);
+        EditText inputSearch = view.findViewById(R.id.input_search);
+
+        titleTv.setText("Select Application Type");
+
+        AlertDialog dialog;
+        builder.setView(view);
+        dialog = builder.create();
+
+
+        ApplicationTypeAdapter adapter = new ApplicationTypeAdapter(context, appList, (app, position) -> {
+            dialog.cancel();
+            listener.onApplicationTypeSelected(app);
+        }, selectedType);
+
+        LinearLayoutManager manager = new LinearLayoutManager(context);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setAdapter(adapter);
+
+        cancelIv.setOnClickListener(v -> dialog.dismiss());
+
+        inputSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+
+        dialog.show();
+
+    }
+
+    // TODO: 04-07-2024 : show point
+    public void showPointDialog(DialogPointListener listener, List<PointTable> pointList, String selectedPoint) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        View view = inflater.inflate(R.layout.layout_bottom_sheet_recycler_view, null);
+
+        RecyclerView recyclerView = view.findViewById(R.id.layout_bottom_sheet_data_recycler_view);
+        TextView titleTv = view.findViewById(R.id.toolbar_title_text_view);
+        ImageView cancelIv = view.findViewById(R.id.tool_bar_navigation_icon_image_view);
+        EditText inputSearch = view.findViewById(R.id.input_search);
+        titleTv.setText("Select Point");
+
+        AlertDialog dialog;
+        builder.setView(view);
+        dialog = builder.create();
+
+
+        SelectPointAdapter adapter = new SelectPointAdapter(context, pointList, (point, position) -> {
+            dialog.cancel();
+            listener.onPointSelected(point);
+        }, selectedPoint);
+
+        LinearLayoutManager manager = new LinearLayoutManager(context);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.setAdapter(adapter);
+
+        cancelIv.setOnClickListener(v -> dialog.dismiss());
+
+        inputSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                adapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        dialog.show();
+
+    }
+
+    public interface DialogComponentListener {
+        void onComponentSelected(ComponentTypeTable table);
+    }
+
+    public interface DialogStagesListener {
+        void onStagesSelected(SpinnerItem stage);
+    }
+
+    public interface DialogBlockListener {
+        void onBlockSelected(BlockTable block);
+    }
+
+    public interface DialogGramListener {
+        void onGramSelected(GramTable table);
+    }
+
+    public interface DialogVillageListener {
+        void onVillageSelected(VillageTable village);
+    }
+
+    public interface DialogApplicationTypeListener {
+        void onApplicationTypeSelected(ApplicationTypeTable app);
+    }
+
+    public interface DialogPointListener {
+        void onPointSelected(PointTable pointTable);
+    }
+}
+

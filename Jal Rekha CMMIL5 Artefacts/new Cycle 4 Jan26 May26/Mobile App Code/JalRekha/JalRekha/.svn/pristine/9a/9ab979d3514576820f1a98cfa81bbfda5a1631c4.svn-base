@@ -1,0 +1,8 @@
+package mapitgis.jalnigam.network
+
+data class BaseResponse<T>(
+    val Success: Boolean,
+    val Message: String,
+    val Data: T?
+)
+

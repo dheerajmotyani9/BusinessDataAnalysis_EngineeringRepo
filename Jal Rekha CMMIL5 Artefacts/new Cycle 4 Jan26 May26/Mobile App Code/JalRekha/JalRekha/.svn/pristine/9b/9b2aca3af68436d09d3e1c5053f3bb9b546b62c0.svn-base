@@ -1,0 +1,32 @@
+package mapitgis.jalnigam.nirmal.database.dao
+
+import androidx.room.*
+import mapitgis.jalnigam.nirmal.database.table.NirmalAssignedSurvey
+
+@Dao
+interface NirmalAssignedSurveyDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSurvey(survey: NirmalAssignedSurvey)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllSurveys(surveys: List<NirmalAssignedSurvey>)
+
+    @Query("SELECT * FROM nirmal_assigned_survey WHERE isActive = '1'")
+    suspend fun getAllSurveys(): List<NirmalAssignedSurvey>
+
+    /*@Query("SELECT * FROM nirmal_assigned_survey WHERE user_id = :userId")
+    suspend fun getSurveysByUserId(userId: String): List<NirmalAssignedSurvey>*/
+
+    @Query("DELETE FROM nirmal_assigned_survey")
+    suspend fun clearTable()
+
+    @Delete
+    suspend fun deleteSurvey(survey: NirmalAssignedSurvey)
+
+
+
+
+
+
+}

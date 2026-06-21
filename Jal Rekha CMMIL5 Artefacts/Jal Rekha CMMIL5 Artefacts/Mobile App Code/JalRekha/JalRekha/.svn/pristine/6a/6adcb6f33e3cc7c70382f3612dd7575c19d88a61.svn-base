@@ -1,0 +1,27 @@
+package mapitgis.jalnigam.nirmal.location
+
+import android.content.Context
+import android.location.Address
+import android.location.Geocoder
+import android.location.Location
+import java.io.IOException
+import java.util.Locale
+
+object GeoAddress {
+
+    fun getAddress(context: Context,location : Location) : String?{
+        return  getAddress(context,location.latitude,location.longitude)
+    }
+
+    fun getAddress(context: Context,latitude:Double,longitude:Double) : String?{
+        val addresses: List<Address>
+        val geocoder = Geocoder(context, Locale.getDefault())
+        try {
+            addresses = geocoder.getFromLocation(latitude, longitude, 1) as List<Address>
+            if (addresses.isNotEmpty()) return addresses[0].getAddressLine(0)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return null
+    }
+}

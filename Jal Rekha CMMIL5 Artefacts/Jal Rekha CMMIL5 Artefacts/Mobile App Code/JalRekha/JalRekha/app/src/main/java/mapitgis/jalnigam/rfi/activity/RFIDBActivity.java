@@ -1,0 +1,459 @@
+package mapitgis.jalnigam.rfi.activity;
+
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import mapitgis.jalnigam.BuildConfig;
+import mapitgis.jalnigam.Menu;
+import mapitgis.jalnigam.MenuAdapter;
+import mapitgis.jalnigam.R;
+import mapitgis.jalnigam.core.Data;
+import mapitgis.jalnigam.core.Login;
+import mapitgis.jalnigam.core.SpinnerItem;
+import mapitgis.jalnigam.core.SqLite;
+import mapitgis.jalnigam.core.Utility;
+import mapitgis.jalnigam.databinding.ActivityDashboardBinding;
+import mapitgis.jalnigam.rfi.helper.PrefManager;
+import mapitgis.jalnigam.rfi.helper.ProgressHelper;
+import mapitgis.jalnigam.rfi.model.InspectionRequest;
+import mapitgis.jalnigam.network.ApiClient;
+import mapitgis.jalnigam.network.ApiInterface;
+import mapitgis.jalnigam.rfi.model.SyncLogin;
+import mapitgis.jalnigam.room.table.AnushravanStatusTable;
+import mapitgis.jalnigam.room.table.ApplicationTypeTable;
+import mapitgis.jalnigam.room.table.ComponentTypeTable;
+import mapitgis.jalnigam.room.table.InspectionRequestTable;
+import mapitgis.jalnigam.rfi.viewmodel.ContractorViewModel;
+import mapitgis.jalnigam.room.table.LocationTable;
+import mapitgis.jalnigam.room.table.PointTable;
+import mapitgis.jalnigamk.fhtc.screens.dashboard.FHTCDashboardActivity;
+import mapitgis.jalnigamk.fhtc.screens.download.FHTCSelectVillageActivity;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class RFIDBActivity extends AppCompatActivity {
+    private Login login;
+    private PrefManager prefManager;
+    private ProgressHelper progressHelper;
+    private ApiInterface apiInterface;
+    private ContractorViewModel contractorViewModel;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ActivityDashboardBinding binding = ActivityDashboardBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        login = SqLite.instance(this).getLogin();
+        prefManager = new PrefManager(this);
+        apiInterface = ApiClient.getClient(this).create(ApiInterface.class);
+        progressHelper = new ProgressHelper(this);
+        contractorViewModel = new ViewModelProvider(this).get(ContractorViewModel.class);
+
+        View.OnClickListener logoutLi = view -> {
+            Data data = new Data();
+            data.put("imei", login.getMobile());//Utility.getDeviceID(this));
+            Utility.show(this, getString(R.string.are_you_sure), getString(R.string.want_to_logout_from_app), getString(R.string.logout), view1 ->{
+                SqLite.instance(this).logout();
+                prefManager.logout();
+                Utility.goFirst(this, true);
+                Utility.show(this, "Logged out successfully.");
+            }, true);
+        };
+
+
+        binding.buttonProfile.setText(R.string.logout);
+        binding.buttonProfile.setOnClickListener(logoutLi);
+
+        binding.textViewLogout.setText(Utility.html(String.format("<u>%s</u>", getString(R.string.logout))));
+        binding.textViewLogout.setOnClickListener(logoutLi);
+
+        binding.textViewVersion.setText(String.format("Version %s", BuildConfig.VERSION_NAME));
+
+        MenuAdapter menuAdapter = new MenuAdapter(this) {
+            @Override
+            protected void onClick(@NonNull Menu menu) {
+                onMenu(menu.getId());
+            }
+        };
+
+
+        binding.textViewScheme.setText(prefManager.getSchemeName());
+        binding.textViewTPIA.setText(prefManager.getTpiaName());
+        binding.textViewSQC.setText(prefManager.getSqcName());
+        binding.textViewName.setText(login.getName());//prefManager.getUserName());
+        binding.textViewPIU.setText(prefManager.getPiuName());
+        binding.textViewMobile.setText(login.getMobile());//prefManager.getUserMobile());
+
+
+        menuAdapter.add(new Menu(1, R.color.green, R.drawable.ic_sync, R.string.sync_data, R.string.sync_data_detail));
+        menuAdapter.add(new Menu(2, R.color.blue, R.drawable.work_monitoring, R.string.work_monitoring, R.string.rfi));
+        menuAdapter.add(new Menu(3, R.color.colorPrimaryDark, R.drawable.monitoring, R.string.complaint_list, R.string.complaint_list_detail));
+
+
+        if (login.getRoleId() == 9) {//RFI Contractor
+            binding.linearLayoutRFIContractor.setVisibility(View.VISIBLE);
+            binding.linearLayoutRFI1.setVisibility(View.VISIBLE);
+            binding.linearLayoutRFI2.setVisibility(View.VISIBLE);
+            binding.viewRFI3.setVisibility(View.VISIBLE);
+
+            if (!prefManager.getSourceType().equalsIgnoreCase("Self Reg")) {
+                menuAdapter.add(new Menu(4, R.color.red, R.drawable.ic_profile, R.string.add_contractor, R.string.add_contractor_detail));
+            }
+
+            menuAdapter.add(new Menu(6, R.color.colorPrimaryDark, R.drawable.outline_water_damage_24, R.string.fhtc_title, R.string.fhtc_subtitle));
+        } else {
+            menuAdapter.add(new Menu(5, R.color.colorPrimaryDark, R.drawable.ic_profile, R.string.profile, R.string.profile));
+            binding.linearLayoutRFIContractor.setVisibility(View.GONE);
+        }
+
+        binding.gridView.setAdapter(menuAdapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!progressHelper.isAutoTimeEnabled(this)){
+            progressHelper.showAutoTimeDialog(this);
+        }
+    }
+
+    private void onMenu(int id) {
+        switch (id) {
+            case 1:
+                syncInspectionRequest();
+                break;
+            case 2:
+                Utility.open(this,WorkMonitoringActivity.class);
+                break;
+            case 3:
+                Utility.open(this,ContractorDISurveyActivity.class);
+                break;
+            case 4:
+                Utility.open(this,AddContractorActivity.class);
+                break;
+            case 5:
+                Utility.open(this,ProfileActivity.class);
+                break;
+            case 6: //FHTC
+                Utility.open(this, FHTCDashboardActivity.class);
+                break;
+
+        }
+    }
+
+
+
+    // TODO: 12-07-2024 : sync data for contractor
+    private void syncInspectionRequest() {
+
+        Map<String, String> body = new HashMap<>();
+        body.put("piu_id", "0");
+        body.put("sqc_user_id", "0");
+        body.put("tpia_user_id", "0");
+
+        body.put("scheme_id", "0");
+        body.put("insert_date", "0");
+        body.put(Utility.E_TOKEN, login.getToken());//prefManager.getToken1());
+
+        if (login.getRoleId() == 9) {//RFI Contractor
+//        if (prefManager.getUserType().equalsIgnoreCase("contractor")) {
+            body.put("contractor_id", login.getIdS());//prefManager.getUserId());
+            body.put("assigne_to", "0");
+            body.put("is_assigned", "0");
+        } else {
+            body.put("assigne_to", "47");
+            body.put("contractor_id", "0");
+            body.put("is_assigned", "3");
+        }
+
+
+        progressHelper.showProgress("Please wait..");
+        Call<InspectionRequest> call;
+
+        if (login.getRoleId() == 9) {//RFI Contractor
+//        if (prefManager.getUserType().equalsIgnoreCase("contractor")) {
+            call = apiInterface.getInspectionRequest(body);
+        } else {
+            call = apiInterface.getFEInspectionRequest(body);
+        }
+
+
+        call.enqueue(new Callback<InspectionRequest>() {
+            @Override
+            public void onResponse(Call<InspectionRequest> call, Response<InspectionRequest> response) {
+                if (response.body().isSuccess()) {
+                    if (response.body().getDataList() == null || response.body().getDataList().isEmpty()) {
+                        progressHelper.dismissProgress();
+                        progressHelper.message("No data found for sync");
+                    } else {
+                        saveDataLocally(response.body().getDataList());
+                    }
+                } else {
+                    progressHelper.dismissProgress();
+                    if (response.body().getMessage().toLowerCase().contains("session expired")) {
+                        progressHelper.showSuccessDialog("Your session is expired. Please login again", "Session Expired", "back", "OK", new ProgressHelper.ShowDialogListener() {
+                            @Override
+                            public void onShowDialogButtonClicked(String type) {
+                                prefManager.logout();
+                                Utility.goFirst(RFIDBActivity.this,true);
+//                                startActivity(new Intent(RFIDBActivity.this, TypeActivity.class)
+//                                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+//
+//                                finish();
+                            }
+                        });
+                    } else {
+                        progressHelper.message(response.body().getMessage());
+                        //saveDataLocally(response.body().getDataList());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<InspectionRequest> call, Throwable t) {
+                progressHelper.message("Something went wrong");
+                progressHelper.dismissProgress();
+            }
+        });
+
+    }
+
+
+    // TODO: 18-10-2024 :sync data for RFI Contractor
+    private void getSyncData() {
+        Map<String, String> body = new HashMap<>();
+//        body.put("etoken", prefManager.getToken1());
+        body.put(Utility.E_TOKEN, login.getToken());
+        body.put("scheme_id", prefManager.getSchemeId());
+
+        // progressHelper.showProgress("Syncing...");
+        Call<SyncLogin> call = apiInterface.syncData(body);
+
+        call.enqueue(new Callback<SyncLogin>() {
+            @Override
+            public void onResponse(@NonNull Call<SyncLogin> call, @NonNull Response<SyncLogin> response) {
+                progressHelper.dismissProgress();
+
+                if (response.body() != null && response.body().isSuccess()) {
+
+                    // TODO: 09-07-2024 : here we delete already saved data
+                    contractorViewModel.deleteAllData();
+                    SqLite.instance(RFIDBActivity.this).CLEAR_QA_QC_REVIEW_DI_NEW();
+                    SqLite.instance(RFIDBActivity.this).CLEAR_STAGES_RFI();
+
+                    SyncLogin.SyncLoginData data = response.body().getData();
+
+                    List<SyncLogin.SyncLoginData.SyncComponent> compnentList = data.getComponentList();
+                    List<SyncLogin.SyncLoginData.SyncApplicationType> applicationTypeList = data.getApplicationTypeList();
+                    List<SyncLogin.SyncLoginData.SyncLocation> locationList = data.getLocationList();
+                    List<SyncLogin.SyncLoginData.SyncPoint> pointList = data.getPointList();
+                    List<SyncLogin.SyncLoginData.SyncQaQcReview> qaQcReviewList = data.getQaQcReviewList();
+                    List<SyncLogin.SyncLoginData.SyncStatus> statusList = data.getStatusList();
+                    List<SyncLogin.SyncLoginData.SyncStages> stagesList = data.getStagesList();
+
+                    //insert pipeline list in table
+                    contractorViewModel.insertPipeLineMaster(data.getPipeLineList());
+
+                    //insert sopn oht
+                    contractorViewModel.insertSopanOhtMaster(data.getSopanOhtMaster());
+
+                    if (!applicationTypeList.isEmpty()) {
+                        for (int i = 0; i < applicationTypeList.size(); i++) {
+                            SyncLogin.SyncLoginData.SyncApplicationType type = applicationTypeList.get(i);
+                            ApplicationTypeTable applicationTypeTable = new ApplicationTypeTable();
+                            applicationTypeTable.setAppTypeId(type.getApplicationId());
+                            applicationTypeTable.setAppTypeName(type.getApplicationName());
+
+                            contractorViewModel.insertApplicationType(applicationTypeTable);
+                        }
+                    }
+
+                    if (!compnentList.isEmpty()) {
+                        for (int i = 0; i < compnentList.size(); i++) {
+                            SyncLogin.SyncLoginData.SyncComponent component = compnentList.get(i);
+                            ComponentTypeTable componentTypeTable = new ComponentTypeTable();
+                            componentTypeTable.setComponentId(component.getComponentId());
+                            componentTypeTable.setComponentType(component.getComponentType());
+                            componentTypeTable.setComponentName(component.getComponentName());
+                            componentTypeTable.setComponentId(component.getComponentId());
+
+                            contractorViewModel.insertComponentType(componentTypeTable);
+                        }
+                    }
+
+                    if (!locationList.isEmpty()) {
+                        for (int i = 0; i < locationList.size(); i++) {
+                            SyncLogin.SyncLoginData.SyncLocation location = locationList.get(i);
+
+                            LocationTable locationTable = new LocationTable();
+                            locationTable.setBlockId(location.getBlockId());
+                            locationTable.setBlockName(location.getBlockName());
+                            locationTable.setDistrictId(location.getDistrictId());
+                            locationTable.setSchemeId(location.getSchemeId());
+                            locationTable.setSchemeName(location.getSchemeName());
+                            locationTable.setDistrictName(location.getDistrictName());
+                            locationTable.setGramId(location.getGramPId());
+                            locationTable.setGramName(location.getGramPName());
+                            locationTable.setVillageId(location.getVillageId());
+                            locationTable.setVillageName(location.getVillageName());
+
+                            contractorViewModel.insertLocation(locationTable);
+                        }
+                    }
+
+                    if (!pointList.isEmpty()) {
+                        for (int i = 0; i < pointList.size(); i++) {
+                            SyncLogin.SyncLoginData.SyncPoint point = pointList.get(i);
+
+                            PointTable pointTable = new PointTable();
+                            pointTable.setCid(point.getCid());
+                            pointTable.setGid(point.getGid());
+                            pointTable.setName(point.getName());
+                            pointTable.setLatitude(Double.parseDouble(point.getLat()));
+                            pointTable.setLongitude(Double.parseDouble(point.getLng()));
+                            pointTable.setVillageId(point.getVillageId());
+                            pointTable.setVillageName(point.getVillageName());
+
+                            contractorViewModel.insertPoint(pointTable);
+                        }
+                    }
+
+                    if (!qaQcReviewList.isEmpty()) {
+                        for (SyncLogin.SyncLoginData.SyncQaQcReview review : qaQcReviewList) {
+                            SqLite.instance(RFIDBActivity.this).ADD_QA_QC_REVIEW_DI_NEW(new SpinnerItem(review.getQaQcReviewTypeId(), review.getQaQcReview()));
+                        }
+                    }
+
+                    if (!statusList.isEmpty()) {
+                        List<AnushravanStatusTable> statusTableList = new ArrayList<>();
+                        for (SyncLogin.SyncLoginData.SyncStatus status : statusList) {
+                            Log.e("TYPE", "STATUS " + status.getStatusName());
+                            AnushravanStatusTable table = new AnushravanStatusTable();
+                            table.setStatusGroup(status.getStatusGrp());
+                            table.setStatusGrpName(status.getStatusGrpName());
+                            table.setStatusId(status.getStatusId());
+                            table.setStatusName(status.getStatusName());
+                            statusTableList.add(table);
+                        }
+                        contractorViewModel.insertAnushravanStatus(statusTableList);
+                    }
+
+                    if (!stagesList.isEmpty()) {
+                        for (SyncLogin.SyncLoginData.SyncStages stage : stagesList) {
+                            SqLite.instance(RFIDBActivity.this).ADD_STAGES_RFI(new SpinnerItem(stage.getId(), stage.getName()));
+                        }
+                    }
+
+
+                    progressHelper.dismissProgress();
+                    progressHelper.message("Sync successfully");
+//                    syncInspectionRequest();
+//                    prefManager.setIsLoggedIn(true);
+//                    startActivity(new Intent(TypeActivity.this, RFIDashboardActivity.class)
+//                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+//                    finish();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<SyncLogin> call, @NonNull Throwable t) {
+                Log.e("TAG", "SyncLogin " + t.getMessage());
+                progressHelper.dismissProgress();
+                progressHelper.message("Something went wrong!");
+            }
+        });
+    }
+
+    private void saveDataLocally(List<InspectionRequest.InspectionRequestData> requestList) {
+        List<InspectionRequestTable> inspectionRequestTableList = new ArrayList<>();
+        for (InspectionRequest.InspectionRequestData data : requestList) {
+            InspectionRequestTable requestTable = new InspectionRequestTable();
+            requestTable.setPiuId(data.getPuiId());
+            requestTable.setPiuName(data.getPiuName());
+            requestTable.setSchemeId(data.getSchemeId());
+            requestTable.setSchemeName(data.getSchemeName());
+            requestTable.setComponentId(data.getComponentId());
+            requestTable.setComponentName(data.getComponentName());
+            requestTable.setPointId(data.getComponentPoints());
+            requestTable.setPointName(data.getPointName());
+            requestTable.setBlockId("");
+            requestTable.setBlockName("");
+            requestTable.setGramName("");
+            requestTable.setGramId("");
+            requestTable.setVillageId(data.getVillageId());
+            requestTable.setVillageName(data.getVillageName());
+            requestTable.setApplicationId(data.getApplicationId());
+            requestTable.setApplicationName(data.getApplicationName());
+            requestTable.setLocation(data.getAddress());
+            requestTable.setDescription(data.getDescription());
+            requestTable.setInspectionDate(data.getInspectionDate());
+            requestTable.setImages(data.getImagePath());
+            requestTable.setLatitude(data.getLatitude());
+            requestTable.setLongitude(data.getLongitude());
+            requestTable.setGeoAddress(data.getGeoAddress());
+
+            requestTable.setContractorId(data.getContractorId());
+            requestTable.setUploadStatus(1);
+            requestTable.setStatus(data.getStatus());
+
+            requestTable.setContractorName(data.getContractorName());
+            requestTable.setQaQcReview(data.getFinalQaQcReview());
+            requestTable.setInsertDate(data.getInsertDate());
+            requestTable.setRfiId(data.getRfiId());
+            requestTable.setSlNo(data.getSlno());
+            requestTable.setSqcId(data.getSqcUserId());
+            requestTable.setSqcName(data.getSqcName());
+            requestTable.setTpiaId(data.getTpiaUserId());
+            requestTable.setTpiaName(data.getTpiaName());
+
+            requestTable.setFeMobile(data.getFeMobile());
+            requestTable.setFeName(data.getFeName());
+            requestTable.setFeRemark(data.getFeRemark());
+            requestTable.setStatusName(data.getStatusName());
+            requestTable.setSurveyAddress(data.getSurveyAddress());
+            requestTable.setSurveyComment(data.getSurveyComment());
+            requestTable.setSurveyLatitude(data.getSurveyLatitude());
+            requestTable.setSurveyLongitude(data.getSurveyLongitude());
+            requestTable.setSurveyPhotoPath(data.getSurveyPhotoPath());
+            requestTable.setSurveyReview(data.getSurveyReview());
+
+
+            requestTable.setStageId(data.getStageId());
+            requestTable.setStageName(data.getStageName());
+
+            requestTable.setAllotmentType(data.getAllotmentType());
+
+            requestTable.setSavedBy(login.getRoleLC());//
+            requestTable.setSavedByLoginId(login.getIdS());//prefManager.getUserId());
+
+            //--------new param for pipeline info------//
+            requestTable.setPipeNo(data.getPipeNo()==null ? "0" :data.getPipeNo());
+            requestTable.setLengthSlot(data.getLengthSlot()==null ? "0" :data.getLengthSlot());
+            requestTable.setMbrOhtSurveyId(data.getSurveyUID()==null ? "0" :data.getSurveyUID());
+
+            inspectionRequestTableList.add(requestTable);
+        }
+
+        contractorViewModel.insertInspectionAllRequest(inspectionRequestTableList);
+
+        if(login.getRoleId() == 9){
+            getSyncData();
+        }else{
+            progressHelper.dismissProgress();
+            progressHelper.message("Sync successfully");
+        }
+    }
+}

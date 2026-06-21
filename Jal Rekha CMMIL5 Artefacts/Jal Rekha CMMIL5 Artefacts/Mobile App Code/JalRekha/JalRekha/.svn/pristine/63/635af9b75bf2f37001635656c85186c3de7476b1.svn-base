@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="5dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:elevation="5dp"
+        tools:ignore="UnusedAttribute">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="5dp"
+            app:contentInsetStartWithNavigation="0dp"
+            app:elevation="5dp"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:subtitleTextAppearance="@style/SubTitleTextMenu"
+            app:titleTextAppearance="@style/TitleTextMenu">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                tools:ignore="UseCompoundDrawables">
+
+                <TextView
+                    android:id="@+id/textViewTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/app_name"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardViewButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginStart="@dimen/dp5"
+                    android:layout_marginEnd="@dimen/dp5"
+                    app:cardBackgroundColor="@color/card"
+                    app:cardCornerRadius="25dp"
+                    app:cardElevation="@dimen/dp5"
+                    app:cardUseCompatPadding="false">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingStart="@dimen/dp10"
+                        android:paddingTop="@dimen/dp5"
+                        android:paddingEnd="@dimen/dp10"
+                        android:paddingBottom="@dimen/dp5">
+
+                        <ImageView
+                            android:id="@+id/imageViewButton"
+                            android:layout_width="20dp"
+                            android:layout_height="24dp"
+                            android:contentDescription="@string/app_name"
+                            android:src="@drawable/ic_add"
+                            app:tint="?attr/colorPrimary" />
+
+                        <TextView
+                            android:id="@+id/textViewButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/dp5"
+                            android:text="@string/add_new"
+                            android:textColor="?attr/colorPrimary"
+                            android:textSize="14sp"
+                            android:textStyle="normal" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+<!--    <FrameLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent">-->
+
+        <FrameLayout
+            android:id="@+id/viewList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/viewEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/assets_not_found_here"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+
+<!--                <RadioGroup-->
+<!--                    android:id="@+id/radioGroup"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:orientation="horizontal"-->
+<!--                    android:checkedButton="@id/check1">-->
+
+<!--                    <RadioButton-->
+<!--                        android:id="@+id/check1"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="@string/pending"-->
+<!--                        android:tag="1"/>-->
+
+<!--                    <RadioButton-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="@string/all"-->
+<!--                        android:tag="2" />-->
+<!--                </RadioGroup>-->
+
+                <ListView
+                    android:id="@+id/listView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:divider="@null"
+                    android:scrollbars="none"
+                    tools:listitem="@layout/adapter_asset" />
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+<!--        <ScrollView-->
+<!--            android:id="@+id/scrollView"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:background="@color/white"-->
+<!--            android:fillViewport="true">-->
+
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="vertical"-->
+<!--                android:padding="@dimen/dp16">-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="@dimen/dp10"-->
+<!--                    android:layout_marginBottom="@dimen/dp5"-->
+<!--                    android:text="@string/scheme"-->
+<!--                    android:textColor="@color/colorPrimary"-->
+<!--                    android:textSize="14sp" />-->
+
+<!--                <LinearLayout-->
+<!--                    android:id="@+id/linearLayoutScheme"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:background="@drawable/spinner_bg"-->
+<!--                    android:gravity="center"-->
+<!--                    android:orientation="horizontal"-->
+<!--                    android:paddingStart="@dimen/dp20"-->
+<!--                    android:paddingEnd="@dimen/dp20">-->
+
+<!--                    <TextView-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_weight="1"-->
+<!--                        android:text="@string/select"-->
+<!--                        android:textColor="?attr/colorPrimary"-->
+<!--                        android:textSize="11sp" />-->
+
+<!--                    <ImageView-->
+<!--                        android:layout_width="@dimen/dp20"-->
+<!--                        android:layout_height="@dimen/dp20"-->
+<!--                        android:contentDescription="@string/app_name"-->
+<!--                        android:src="@drawable/ic_arrow_down"-->
+<!--                        app:tint="?attr/colorPrimary" />-->
+
+<!--                </LinearLayout>-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="@dimen/dp10"-->
+<!--                    android:layout_marginBottom="@dimen/dp5"-->
+<!--                    android:text="@string/component"-->
+<!--                    android:textColor="@color/colorPrimary"-->
+<!--                    android:textSize="14sp" />-->
+
+<!--                <LinearLayout-->
+<!--                    android:id="@+id/linearLayoutComponent"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:background="@drawable/spinner_bg"-->
+<!--                    android:gravity="center"-->
+<!--                    android:orientation="horizontal"-->
+<!--                    android:paddingStart="@dimen/dp20"-->
+<!--                    android:paddingEnd="@dimen/dp20">-->
+
+<!--                    <TextView-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_weight="1"-->
+<!--                        android:text="@string/select"-->
+<!--                        android:textColor="?attr/colorPrimary"-->
+<!--                        android:textSize="11sp" />-->
+
+<!--                    <ImageView-->
+<!--                        android:layout_width="@dimen/dp20"-->
+<!--                        android:layout_height="@dimen/dp20"-->
+<!--                        android:contentDescription="@string/app_name"-->
+<!--                        android:src="@drawable/ic_arrow_down"-->
+<!--                        app:tint="?attr/colorPrimary" />-->
+
+<!--                </LinearLayout>-->
+
+
+<!--                <TextView-->
+<!--                    android:id="@+id/textViewESR"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="@dimen/dp10"-->
+<!--                    android:layout_marginBottom="@dimen/dp5"-->
+<!--                    android:text="@string/esr"-->
+<!--                    android:textColor="@color/colorPrimary"-->
+<!--                    android:textSize="14sp" />-->
+
+<!--                <LinearLayout-->
+<!--                    android:id="@+id/linearLayoutESR"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:background="@drawable/spinner_bg"-->
+<!--                    android:gravity="center"-->
+<!--                    android:orientation="horizontal"-->
+<!--                    android:paddingStart="@dimen/dp20"-->
+<!--                    android:paddingEnd="@dimen/dp20">-->
+
+<!--                    <TextView-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_weight="1"-->
+<!--                        android:text="@string/select"-->
+<!--                        android:textColor="?attr/colorPrimary"-->
+<!--                        android:textSize="11sp" />-->
+
+<!--                    <ImageView-->
+<!--                        android:layout_width="@dimen/dp20"-->
+<!--                        android:layout_height="@dimen/dp20"-->
+<!--                        android:contentDescription="@string/app_name"-->
+<!--                        android:src="@drawable/ic_arrow_down"-->
+<!--                        app:tint="?attr/colorPrimary" />-->
+
+<!--                </LinearLayout>-->
+
+
+<!--                <TextView-->
+<!--                    android:id="@+id/textViewPoints"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="@dimen/dp10"-->
+<!--                    android:layout_marginBottom="@dimen/dp5"-->
+<!--                    android:text="@string/points"-->
+<!--                    android:textColor="@color/colorPrimary"-->
+<!--                    android:textSize="14sp" />-->
+
+<!--                <LinearLayout-->
+<!--                    android:id="@+id/linearLayoutPoints"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:background="@drawable/spinner_bg"-->
+<!--                    android:gravity="center"-->
+<!--                    android:orientation="horizontal"-->
+<!--                    android:paddingStart="@dimen/dp20"-->
+<!--                    android:paddingEnd="@dimen/dp20">-->
+
+<!--                    <TextView-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_weight="1"-->
+<!--                        android:text="@string/select"-->
+<!--                        android:textColor="?attr/colorPrimary"-->
+<!--                        android:textSize="11sp" />-->
+
+<!--                    <ImageView-->
+<!--                        android:layout_width="@dimen/dp20"-->
+<!--                        android:layout_height="@dimen/dp20"-->
+<!--                        android:contentDescription="@string/app_name"-->
+<!--                        android:src="@drawable/ic_arrow_down"-->
+<!--                        app:tint="?attr/colorPrimary" />-->
+
+<!--                </LinearLayout>-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/textViewPastPoints"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="@dimen/dp10"-->
+<!--                    android:layout_marginBottom="@dimen/dp5"-->
+<!--                    android:text="@string/linked_with_last_point"-->
+<!--                    android:textColor="@color/colorPrimary"-->
+<!--                    android:textSize="14sp" />-->
+
+<!--                <LinearLayout-->
+<!--                    android:id="@+id/linearLayoutPastPoints"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:background="@drawable/spinner_bg"-->
+<!--                    android:gravity="center"-->
+<!--                    android:orientation="horizontal"-->
+<!--                    android:paddingStart="@dimen/dp20"-->
+<!--                    android:paddingEnd="@dimen/dp20">-->
+
+<!--                    <TextView-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_weight="1"-->
+<!--                        android:text="@string/select"-->
+<!--                        android:textColor="?attr/colorPrimary"-->
+<!--                        android:textSize="11sp" />-->
+
+<!--                    <ImageView-->
+<!--                        android:layout_width="@dimen/dp20"-->
+<!--                        android:layout_height="@dimen/dp20"-->
+<!--                        android:contentDescription="@string/app_name"-->
+<!--                        android:src="@drawable/ic_arrow_down"-->
+<!--                        app:tint="?attr/colorPrimary" />-->
+
+<!--                </LinearLayout>-->
+
+<!--                <Button-->
+<!--                    android:id="@+id/buttonTraverse"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="@string/start_traverse"-->
+<!--                    android:layout_marginTop="@dimen/dp10"-->
+<!--                    android:visibility="gone"/>-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/textViewPhoto"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="@dimen/dp10"-->
+<!--                    android:layout_marginBottom="@dimen/dp5"-->
+<!--                    android:text="@string/photo"-->
+<!--                    android:textColor="@color/colorPrimary"-->
+<!--                    android:textSize="14sp" />-->
+
+<!--                <LinearLayout-->
+<!--                    android:id="@+id/linearLayoutImage"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:background="@drawable/spinner_bg"-->
+<!--                    android:gravity="center"-->
+<!--                    android:orientation="horizontal"-->
+<!--                    android:paddingStart="@dimen/dp20"-->
+<!--                    android:paddingEnd="@dimen/dp20">-->
+
+<!--                    <TextView-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_weight="1"-->
+<!--                        android:text="@string/please_capture_photo"-->
+<!--                        android:textColor="?attr/colorPrimary"-->
+<!--                        android:textSize="11sp" />-->
+
+<!--                    <ImageView-->
+<!--                        android:layout_width="@dimen/dp20"-->
+<!--                        android:layout_height="@dimen/dp20"-->
+<!--                        android:contentDescription="@string/app_name"-->
+<!--                        android:src="@drawable/ic_add_circle_outline"-->
+<!--                        app:tint="?attr/colorPrimary" />-->
+<!--                </LinearLayout>-->
+
+<!--                <ImageView-->
+<!--                    android:id="@+id/imageViewPhoto"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="300dp"-->
+<!--                    android:layout_marginTop="@dimen/dp10"-->
+<!--                    android:background="@drawable/edit_box"-->
+<!--                    android:padding="@dimen/dp5"-->
+<!--                    android:contentDescription="@string/app_name"-->
+<!--                    android:scaleType="centerInside"-->
+<!--                    android:visibility="gone" />-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="@dimen/dp10"-->
+<!--                    android:layout_marginBottom="@dimen/dp5"-->
+<!--                    android:text="@string/review"-->
+<!--                    android:textColor="@color/colorPrimary"-->
+<!--                    android:textSize="14sp" />-->
+
+<!--                <EditText-->
+<!--                    android:id="@+id/editTextReview"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:background="@drawable/edit_box"-->
+<!--                    android:hint="@string/review"-->
+<!--                    android:importantForAutofill="no"-->
+<!--                    android:inputType="text"-->
+<!--                    android:lines="1"-->
+<!--                    android:maxLines="1"-->
+<!--                    android:padding="@dimen/dp5"-->
+<!--                    android:singleLine="true"-->
+<!--                    android:textColor="@color/colorPrimary"-->
+<!--                    android:textCursorDrawable="@null"-->
+<!--                    android:textSize="14sp" />-->
+
+
+<!--                <FrameLayout-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="320dp"-->
+<!--                    android:layout_marginTop="@dimen/dp10"-->
+<!--                    android:background="@drawable/edit_box">-->
+
+<!--                    <com.google.android.gms.maps.MapView-->
+<!--                        android:id="@+id/mapView"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="match_parent" />-->
+
+<!--                    <ImageView-->
+<!--                        android:id="@+id/imageViewCurrentLocation"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_gravity="end"-->
+<!--                        android:layout_margin="@dimen/dp5"-->
+<!--                        android:src="@drawable/ic_location_searching"-->
+<!--                        app:tint="@color/black" />-->
+
+
+<!--                    <TextView-->
+<!--                        android:id="@+id/textViewLocation"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_gravity="bottom"-->
+<!--                        android:background="#99000000"-->
+<!--                        android:gravity="center"-->
+<!--                        android:padding="@dimen/dp5"-->
+<!--                        android:text="@string/app_name"-->
+<!--                        android:textColor="@color/white"-->
+<!--                        android:textSize="11sp"-->
+<!--                        android:textStyle="bold" />-->
+
+<!--                </FrameLayout>-->
+
+<!--                &lt;!&ndash;            <Space&ndash;&gt;-->
+<!--                &lt;!&ndash;                android:layout_width="wrap_content"&ndash;&gt;-->
+<!--                &lt;!&ndash;                android:layout_height="0dp"&ndash;&gt;-->
+<!--                &lt;!&ndash;                android:layout_weight="1" />&ndash;&gt;-->
+
+
+<!--                &lt;!&ndash;            <Button&ndash;&gt;-->
+<!--                &lt;!&ndash;                android:id="@+id/buttonSave"&ndash;&gt;-->
+<!--                &lt;!&ndash;                android:layout_width="match_parent"&ndash;&gt;-->
+<!--                &lt;!&ndash;                android:layout_height="wrap_content"&ndash;&gt;-->
+<!--                &lt;!&ndash;                android:layout_marginTop="@dimen/dp20"&ndash;&gt;-->
+<!--                &lt;!&ndash;                android:text="@string/save" />&ndash;&gt;-->
+
+<!--            </LinearLayout>-->
+
+<!--        </ScrollView>-->
+
+<!--    </FrameLayout>-->
+
+</LinearLayout>

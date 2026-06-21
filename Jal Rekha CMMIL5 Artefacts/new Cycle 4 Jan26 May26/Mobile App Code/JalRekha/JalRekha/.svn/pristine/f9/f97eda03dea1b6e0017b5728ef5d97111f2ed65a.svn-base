@@ -1,0 +1,101 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+    id 'kotlin-parcelize'
+}
+
+android {
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "mapitgis.jalnigam"
+        minSdk 24
+        targetSdk 36
+        versionCode 90
+        versionName "9.0"
+        multiDexEnabled true
+        setProperty("archivesBaseName", "JalRekha " + versionName + " R" + versionCode)
+    }
+
+    buildTypes {
+        release {
+            buildConfigField "String", 'JAL_NIGAM_BASE_URL', "\"$BASE_URL_PROD$JAL_NIGAM_PROD_API\""
+            buildConfigField "String", 'JAL_NIGAM_IMAGE', "\"$BASE_URL_PROD$JAL_NIGAM_IMAGE_PROD\""
+
+            applicationIdSuffix ".release"
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            /*buildConfigField "String", 'JAL_NIGAM_BASE_URL', "\"$BASE_URL_LOCAL$JAL_NIGAM_LOCAL_API\""//LOCAL
+            buildConfigField "String", 'JAL_NIGAM_IMAGE', "\"$BASE_URL_UAT$JAL_NIGAM_IMAGE_UAT\""*/
+
+            /*buildConfigField "String", 'JAL_NIGAM_BASE_URL', "\"$BASE_URL_PROD$JAL_NIGAM_PROD_API\"" //LIVE
+            buildConfigField "String", 'JAL_NIGAM_IMAGE', "\"$BASE_URL_PROD$JAL_NIGAM_IMAGE_PROD\""*/
+
+            buildConfigField "String", 'JAL_NIGAM_BASE_URL', "\"$BASE_URL_UAT$JAL_NIGAM_UAT_API\"" //UAT
+            buildConfigField "String", 'JAL_NIGAM_IMAGE', "\"$BASE_URL_UAT$JAL_NIGAM_IMAGE_UAT\""
+
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-DEBUG"
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    namespace 'mapitgis.jalnigam'
+    buildFeatures {
+        buildConfig true
+        viewBinding true
+        dataBinding true
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'com.google.android.gms:play-services-location:21.3.0'
+    implementation 'com.google.android.gms:play-services-maps:19.1.0'
+    implementation 'com.google.maps.android:android-maps-utils:3.6.0'
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+
+    implementation("com.karumi:dexter:6.2.3")
+
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+    implementation 'androidx.core:core-ktx:1.15.0'
+//    implementation 'androidx.activity:activity:1.8.0'
+//    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+//    implementation 'androidx.navigation:navigation-fragment:2.7.7'
+//    implementation 'androidx.navigation:navigation-ui:2.7.7'
+
+    def room_version = "2.6.1"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+
+    implementation project(":android-pdf-viewer")
+    implementation 'com.softozin:date-time-utility:2.0.0'
+
+    kapt "androidx.room:room-compiler:$room_version" // Annotation Processor for Room
+    implementation "androidx.activity:activity-ktx:1.10.1"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}

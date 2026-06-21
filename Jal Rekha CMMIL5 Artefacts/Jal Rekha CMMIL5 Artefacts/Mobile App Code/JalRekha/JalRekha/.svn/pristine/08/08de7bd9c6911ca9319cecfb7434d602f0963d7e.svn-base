@@ -1,0 +1,86 @@
+package com.app.viewcomponent
+
+import android.content.Context
+import android.graphics.Color
+import android.graphics.Typeface
+import android.os.Build
+import android.text.Html
+import android.util.AttributeSet
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.LinearLayout
+import androidx.annotation.RequiresApi
+import mapitgis.jalnigam.R
+import mapitgis.jalnigam.databinding.ViewFormKeyValueTextBinding
+import mapitgis.jalnigam.databinding.ViewFormLabelBinding
+
+
+@RequiresApi(Build.VERSION_CODES.N)
+class FormKeyValueText @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : LinearLayout(context, attrs, defStyleAttr) {
+
+    private val binding: ViewFormKeyValueTextBinding = ViewFormKeyValueTextBinding.inflate(LayoutInflater.from(context), this)
+
+
+    init {
+        attrs?.let {
+            val attributes = context.obtainStyledAttributes(it, R.styleable.FormKeyValueText)
+            val key = attributes.getString(R.styleable.FormKeyValueText_key)
+            val value = attributes.getString(R.styleable.FormKeyValueText_value)
+            val valueTextStyle = attributes.getInt(R.styleable.FormKeyValueText_valueTextStyle, Typeface.NORMAL)
+            val valueTextColor = attributes.getInt(R.styleable.FormKeyValueText_valueTextColor, context.getColor(R.color.text_color))
+            val weightsString = attributes.getString(R.styleable.FormKeyValueText_weights)
+
+            attributes.recycle()
+            setLabel(key, value)
+            setValueTextStyle(valueTextStyle)
+            setValueTextColor(valueTextColor)
+
+            val (keyWeight, valueWeight) = parseWeights(weightsString)
+            setWeights(keyWeight, valueWeight)
+
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun setLabel(key: String?,value:String?) {
+        binding.tvKey.text =key
+        binding.tvValue.text =value
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun setValue(value:String?) {
+        binding.tvValue.text =value?:""
+    }
+
+
+    fun setValueTextStyle(valueTextStyle: Int) {
+        binding.tvValue.setTypeface(null, valueTextStyle)
+    }
+
+    fun setValueTextColor(color: Int) {
+        binding.tvValue.setTextColor(color)
+    }
+
+
+    private fun parseWeights(weightString: String?): Pair<Float, Float> {
+        return try {
+            val weights = weightString?.split(",")?.map { it.trim().toFloat() }
+            if (weights != null && weights.size == 2) {
+                Pair(weights[0], weights[1])
+            } else {
+                Pair(3f, 7f)
+            }
+        } catch (e: Exception) {
+            Pair(3f, 7f)
+        }
+    }
+
+
+    fun setWeights(keyWeight: Float, valueWeight: Float) {
+        binding.tvKey.layoutParams = LayoutParams(0, LayoutParams.WRAP_CONTENT, keyWeight)
+        binding.tvValue.layoutParams = LayoutParams(0, LayoutParams.WRAP_CONTENT, valueWeight)
+    }
+
+}

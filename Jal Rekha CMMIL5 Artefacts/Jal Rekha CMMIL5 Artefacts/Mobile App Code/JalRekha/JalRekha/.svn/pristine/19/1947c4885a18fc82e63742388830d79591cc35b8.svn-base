@@ -1,0 +1,65 @@
+package mapitgis.jalnigam.room.db;
+
+
+import android.content.Context;
+
+import androidx.room.Database;
+import androidx.room.Room;
+import androidx.room.RoomDatabase;
+import androidx.room.migration.Migration;
+import androidx.sqlite.db.SupportSQLiteDatabase;
+
+import mapitgis.jalnigam.room.dao.JalRekhaDao;
+import mapitgis.jalnigam.room.table.AnushravanStatusTable;
+import mapitgis.jalnigam.room.table.ApplicationTypeTable;
+import mapitgis.jalnigam.room.table.ComponentTypeTable;
+import mapitgis.jalnigam.room.table.InspectionRequestTable;
+import mapitgis.jalnigam.room.table.LocationTable;
+import mapitgis.jalnigam.room.table.MediaTable;
+import mapitgis.jalnigam.room.table.PointTable;
+
+@Database(entities = {ApplicationTypeTable.class, LocationTable.class, ComponentTypeTable.class,
+        PointTable.class, InspectionRequestTable.class, MediaTable.class, AnushravanStatusTable.class}, version = 3,exportSchema = false)
+public abstract class JalRekhaDB extends RoomDatabase {
+
+    public abstract JalRekhaDao jalRekhaDao();
+
+    private static volatile JalRekhaDB jalRekhaDB;
+
+    public static JalRekhaDB getDatabase(Context context) {
+
+        if (jalRekhaDB == null) {
+
+            synchronized (JalRekhaDB.class) {
+
+                if (jalRekhaDB == null) {
+                    jalRekhaDB = Room.databaseBuilder(context.getApplicationContext(),
+                                    JalRekhaDB.class, "jal_rekha_rfi_only")
+//                            JalRekhaDB.class, "jal_rekha_database")
+                            // .fallbackToDestructiveMigration()  // WARNING: Deletes old data
+//                            .addMigrations(NirmalWQMEntity.Companion.getMIGRATION_3_4())
+                            .addMigrations(MIGRATION_1_2)
+                            .addMigrations(MIGRATION_2_3)
+                            .build();
+                }
+            }
+        }
+
+        return jalRekhaDB;
+    }
+
+    public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE inspection_request_table ADD COLUMN stage TEXT");
+        }
+    };
+
+    public static final Migration MIGRATION_2_3 = new Migration(2, 3) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE inspection_request_table ADD COLUMN stageId TEXT");
+        }
+    };
+
+}

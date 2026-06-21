@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="-5dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="@dimen/dp20"
+    app:cardElevation="@dimen/dp2"
+    app:cardUseCompatPadding="true">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/dp10">
+
+        <TextView
+            android:id="@+id/textViewName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/oht"
+            android:textAllCaps="true"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textViewHabitation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textAllCaps="true"
+            android:textColor="@color/black"
+            android:alpha="0.8"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true"
+            android:textSize="10sp"
+            tools:ignore="SmallSp" />
+
+        <TextView
+            android:id="@+id/textViewR1Date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/start_reading_kl"
+            android:textAllCaps="true"
+            android:textColor="@color/red1"
+            android:textSize="10sp"
+            tools:ignore="SmallSp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="-2dp"
+            android:layout_marginEnd="-2dp"
+            android:orientation="vertical"
+            tools:itemCount="4"
+            app:spanCount="4"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            tools:listitem="@layout/adapter_meter_status" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp5"
+            android:layout_marginBottom="@dimen/dp5"
+            android:baselineAligned="false">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/dp5"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+
+                <!--                            <mapitgis.jalnigam.core.ShadowLayout-->
+                <!--                                android:layout_width="match_parent"-->
+                <!--                                android:layout_height="wrap_content"-->
+                <!--                                android:layout_marginStart="-10dp"-->
+                <!--                                android:layout_marginEnd="-10dp"-->
+                <!--                                android:layout_marginTop="-10dp"-->
+                <!--                                app:shadow_background_color="@color/shadowColorBlack"-->
+                <!--                                app:shadow_corner_radius="10dp"-->
+                <!--                                app:shadow_elevation="5dp"-->
+                <!--                                app:shadow_highlight_color="@color/shadow_shadow_color_black"-->
+                <!--                                app:shadow_layer_type="software"-->
+                <!--                                app:shadow_shadow_color="@color/shadow_shadow_color_black"-->
+                <!--                                app:shadow_shadow_type="inner"-->
+                <!--                                app:shadow_view_type="rectangular"-->
+                <!--                                tools:viewBindingIgnore="true">-->
+
+                <!--                                <LinearLayout-->
+                <!--                                    android:layout_width="match_parent"-->
+                <!--                                    android:layout_height="wrap_content"-->
+                <!--                                    android:gravity="center"-->
+                <!--                                    android:orientation="vertical"-->
+                <!--                                    android:padding="@dimen/dp5">-->
+
+                <!--                                    <TextView-->
+                <!--                                        android:layout_width="match_parent"-->
+                <!--                                        android:layout_height="wrap_content"-->
+                <!--                                        android:gravity="center"-->
+                <!--                                        android:text="@string/start_reading_kl"-->
+                <!--                                        android:textAllCaps="true"-->
+                <!--                                        android:textColor="@color/green_light"-->
+                <!--                                        android:textSize="10sp"-->
+                <!--                                        tools:ignore="SmallSp" />-->
+
+                <!--                                    <TextView-->
+                <!--                                        android:id="@+id/textViewR1"-->
+                <!--                                        style="@style/MyDigitalTheme"-->
+                <!--                                        android:layout_width="match_parent"-->
+                <!--                                        android:layout_height="wrap_content"-->
+                <!--                                        android:gravity="center"-->
+                <!--                                        android:text="@string/app_name"-->
+                <!--                                        android:textColor="@color/green_light"-->
+                <!--                                        android:textSize="22sp"-->
+                <!--                                        android:textStyle="bold" />-->
+                <!--                                </LinearLayout>-->
+                <!--                            </mapitgis.jalnigam.core.ShadowLayout>-->
+
+
+                <!--                            <mapitgis.jalnigam.core.ShadowLayout-->
+                <!--                                android:layout_width="match_parent"-->
+                <!--                                android:layout_height="wrap_content"-->
+                <!--                                android:layout_marginStart="-10dp"-->
+                <!--                                android:layout_marginEnd="-10dp"-->
+                <!--                                android:layout_marginTop="-15dp"-->
+                <!--                                android:layout_marginBottom="-10dp"-->
+                <!--                                app:shadow_background_color="@color/shadowColorBlack"-->
+                <!--                                app:shadow_corner_radius="10dp"-->
+                <!--                                app:shadow_elevation="5dp"-->
+                <!--                                app:shadow_highlight_color="@color/shadow_shadow_color_black"-->
+                <!--                                app:shadow_layer_type="software"-->
+                <!--                                app:shadow_shadow_color="@color/shadow_shadow_color_black"-->
+                <!--                                app:shadow_shadow_type="inner"-->
+                <!--                                app:shadow_view_type="rectangular"-->
+                <!--                                tools:viewBindingIgnore="true">-->
+
+                <!--                                <LinearLayout-->
+                <!--                                    android:layout_width="match_parent"-->
+                <!--                                    android:layout_height="wrap_content"-->
+                <!--                                    android:gravity="center"-->
+                <!--                                    android:orientation="vertical"-->
+                <!--                                    android:padding="@dimen/dp5">-->
+
+                <!--                                    <TextView-->
+                <!--                                        android:layout_width="match_parent"-->
+                <!--                                        android:layout_height="wrap_content"-->
+                <!--                                        android:gravity="center"-->
+                <!--                                        android:text="@string/total_supply_kl"-->
+                <!--                                        android:textAllCaps="true"-->
+                <!--                                        android:textColor="@color/green_light"-->
+                <!--                                        android:textSize="10sp"-->
+                <!--                                        tools:ignore="SmallSp" />-->
+
+                <!--                                    <TextView-->
+                <!--                                        android:id="@+id/textViewR2"-->
+                <!--                                        style="@style/MyDigitalTheme"-->
+                <!--                                        android:layout_width="match_parent"-->
+                <!--                                        android:layout_height="wrap_content"-->
+                <!--                                        android:gravity="center"-->
+                <!--                                        android:text="@string/app_name"-->
+                <!--                                        android:textColor="@color/green_light"-->
+                <!--                                        android:textSize="22sp"-->
+                <!--                                        android:textStyle="bold" />-->
+                <!--                                </LinearLayout>-->
+                <!--                            </mapitgis.jalnigam.core.ShadowLayout>-->
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/start_reading_kl"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/star"
+                        android:textColor="@color/red"
+                        android:textStyle="bold"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/editTextStartReading"
+                    style="@style/MyDigitalTheme"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/edit_box"
+                    android:digits="0123456789."
+                    android:gravity="center"
+                    android:hint="@string/reading_0_0"
+                    android:importantForAutofill="no"
+                    android:inputType="numberDecimal"
+                    android:lines="1"
+                    android:maxLines="1"
+                    android:imeOptions="actionNext"
+                    android:padding="@dimen/dp5"
+                    android:singleLine="true"
+                    android:textColor="@color/colorPrimary"
+                    android:textColorHint="@color/gray_light"
+                    android:textCursorDrawable="@null"
+                    android:textSize="25sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp5">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/end_reading_kl"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/star"
+                        android:textColor="@color/red"
+                        android:textStyle="bold"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/editTextEndReading"
+                    style="@style/MyDigitalTheme"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/edit_box"
+                    android:digits="0123456789."
+                    android:gravity="center"
+                    android:hint="@string/reading_0_0"
+                    android:importantForAutofill="no"
+                    android:inputType="numberDecimal"
+                    android:lines="1"
+                    android:maxLines="1"
+                    android:imeOptions="actionNext"
+                    android:padding="@dimen/dp5"
+                    android:singleLine="true"
+                    android:textColor="@color/colorPrimary"
+                    android:textColorHint="@color/gray_light"
+                    android:textCursorDrawable="@null"
+                    android:textSize="25sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp5">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/total_supply_kl"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/star"
+                        android:textColor="@color/red"
+                        android:textStyle="bold"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/editTextTotalWS"
+                    style="@style/MyDigitalTheme"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@drawable/edit_box"
+                    android:digits="0123456789."
+                    android:gravity="center"
+                    android:hint="@string/reading_0_0"
+                    android:importantForAutofill="no"
+                    android:inputType="numberDecimal"
+                    android:lines="1"
+                    android:maxLines="1"
+                    android:imeOptions="actionNext"
+                    android:padding="@dimen/dp5"
+                    android:singleLine="true"
+                    android:textColor="@color/colorPrimary"
+                    android:textColorHint="@color/gray_light"
+                    android:textCursorDrawable="@null"
+                    android:textSize="25sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp5">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/remark"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="12sp" />
+
+                    <!--                                <TextView-->
+                    <!--                                    android:layout_width="wrap_content"-->
+                    <!--                                    android:layout_height="wrap_content"-->
+                    <!--                                    android:text="@string/star"-->
+                    <!--                                    android:textColor="@color/red"-->
+                    <!--                                    android:textStyle="bold"-->
+                    <!--                                    android:textSize="12sp" />-->
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/dp5"
+                android:layout_weight="1"
+                android:background="@drawable/border"
+                android:padding="1dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:background="@color/colorPrimary">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/meter_photo"
+                        android:textColor="@color/white"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/star"
+                        android:textColor="@color/red"
+                        android:textStyle="bold"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/imageViewPhoto"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/app_name"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/add_image" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/editTextEndRemark"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/edit_box"
+            android:gravity="center_vertical"
+            android:hint="@string/remark"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:maxLength="100"
+            android:lines="1"
+            android:maxLines="1"
+            android:imeOptions="actionDone"
+            android:padding="@dimen/dp5"
+            android:singleLine="true"
+            android:textColor="@color/colorPrimary"
+            android:textColorHint="@color/gray_light"
+            android:textCursorDrawable="@null"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

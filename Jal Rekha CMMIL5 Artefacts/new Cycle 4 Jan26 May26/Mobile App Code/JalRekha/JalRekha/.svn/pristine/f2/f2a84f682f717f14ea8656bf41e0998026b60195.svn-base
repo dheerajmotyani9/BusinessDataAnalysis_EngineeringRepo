@@ -1,0 +1,159 @@
+package mapitgis.jalnigam.dhara1;
+
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.maps.model.LatLng;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import mapitgis.jalnigam.core.Utility;
+
+public class Reading {
+    private final int mappingId,mainId,typeId,meterId,lgdId,meterStatusId;
+    private final String village,meterStatusName;
+    private final double r1,r2,ws;
+    private final LatLng latLng;
+    private final String type,remark,date,time;
+    private String photo;
+    public final List<Reading> readings;
+
+    public Reading(int mappingId, int mainId,int typeId, String type, int meterId, double r1, double r2,double ws, LatLng latLng, String remark, String date, String time,int meterStatusId,String meterStatusName) {
+        this.mappingId = mappingId;
+        this.mainId = mainId;
+        this.typeId = typeId;
+        this.type = type;
+        this.meterId = meterId;
+        this.r1 = r1;
+        this.r2 = r2;
+        this.ws = ws;
+        this.latLng = latLng;
+        this.remark = remark;
+        this.photo = "";
+        this.date = date;
+        this.time = time;
+        this.lgdId = 0;
+        this.village = "";
+        this.meterStatusId = meterStatusId;
+        this.meterStatusName = meterStatusName;
+        this.readings = new ArrayList<>();
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
+    }
+
+    public Reading(@NonNull DharaComponent dharaComponent, double readingS,double readingE,double ws, @NonNull LatLng latLng, @NonNull String photo, @NonNull String remark,int meterStatusId,String meterStatusName) {
+        this.mappingId = dharaComponent.getId();
+        this.mainId = dharaComponent.getMAIN_ID();
+        this.typeId = dharaComponent.getType();
+        this.type = dharaComponent.getName();
+        this.meterId = dharaComponent.getMeterId();
+        this.r1 = readingS;//dharaComponent.getR1();
+        this.r2 = readingE;
+        this.ws = ws;
+        this.latLng = latLng;
+        this.remark = remark;
+        this.photo = photo;
+        this.date = dharaComponent.getDate();
+        this.time = Utility.getCurrentTimeOnly().second;
+        this.lgdId = 0;
+        this.village = "";
+        this.meterStatusId = meterStatusId;
+        this.meterStatusName = meterStatusName;
+        this.readings = new ArrayList<>();
+    }
+
+    public Reading(@NonNull DharaComponent dharaComponent, double readingS,double readingE,double ws, @NonNull LatLng latLng, @NonNull String photo, @NonNull String remark,int lgdId, @NonNull String village,int meterStatusId,String meterStatusName) {
+        this.mappingId = dharaComponent.getId();
+        this.mainId = dharaComponent.getMAIN_ID();
+        this.typeId = dharaComponent.getType();
+        this.type = dharaComponent.getName();
+        this.meterId = dharaComponent.getMeterId();
+        this.r1 = readingS;//dharaComponent.getR1();
+        this.r2 = readingE;
+        this.ws = ws;
+        this.latLng = latLng;
+        this.remark = remark;
+        this.photo = photo;
+        this.date = dharaComponent.getDate();
+        this.time = Utility.getCurrentTimeOnly().second;
+        this.lgdId = lgdId;
+        this.village = village;
+        this.readings = new ArrayList<>();
+        this.meterStatusId = meterStatusId;
+        this.meterStatusName = meterStatusName;
+    }
+
+    public double getWs() {
+        return ws;
+    }
+
+    public int getMappingId() {
+        return mappingId;
+    }
+
+    public int getMainId() {
+        return mainId;
+    }
+
+    public int getMeterId() {
+        return meterId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public int getTypeId() {
+        return typeId;
+    }
+
+    public double getR1() {
+        return r1;
+    }
+
+    public double getR2() {
+        return r2;
+    }
+
+    public LatLng getLatLng() {
+        return latLng;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public String getRemarkWithNA() {
+        return remark.isEmpty()?"N/A":remark;
+    }
+
+    public int getLgdId() {
+        return lgdId;
+    }
+
+    public String getVillage() {
+        return village;
+    }
+
+    public int getMeterStatusId() {
+        return meterStatusId;
+    }
+
+    public String getMeterStatusName() {
+        return meterStatusName;
+    }
+}

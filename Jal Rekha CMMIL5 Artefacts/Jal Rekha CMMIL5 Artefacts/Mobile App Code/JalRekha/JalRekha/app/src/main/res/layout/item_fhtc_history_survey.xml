@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="surveyInfo"
+            type="mapitgis.jalnigamk.fhtc.database.dao.UpdateSurveyWithNICSurvey" />
+    </data>
+
+
+    <com.google.android.material.card.MaterialCardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="0dp"
+        app:cardCornerRadius="0dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
+        app:cardBackgroundColor="@color/cardview_light_background">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@{surveyInfo.NICSurvey.nameEn}"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{surveyInfo.NICSurvey.mobileNumber}"
+                    android:drawableLeft="@drawable/outline_call_24"
+                    android:drawableTint="@color/colorPrimaryDark"
+                    android:autoLink="phone"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text='@{"Father/Husband: " + surveyInfo.NICSurvey.fatherHusbandName}'
+                    android:textSize="13sp"
+                    android:textColor="@color/black"/>
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text='@{"FamilyId: " + surveyInfo.NICSurvey.familyId}'
+                    android:textSize="12sp"
+                    android:textColor="@color/gray"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text='@{"SamagraId: " + surveyInfo.NICSurvey.samagraId}'
+                    android:textSize="13sp"
+                    android:textColor="@color/gray"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text='@{"Updated: " + surveyInfo.update.surveyDateTime}'
+                    android:textSize="11sp"
+                    android:textColor="@color/gray"
+                    android:textStyle="bold"/>
+
+
+
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="6">
+
+                <ImageView
+                    android:id="@+id/tap_connection_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/gray_light"
+                    android:scaleType="centerCrop"
+                    app:imageUri="@{surveyInfo.update.imagePath}"/>
+
+                <ImageView
+                    android:id="@+id/btn_delete"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/baseline_cancel_24"
+                    android:layout_margin="12dp"
+                    android:layout_alignParentRight="true"
+                    app:visibilityGone="@{surveyInfo.update.status==0}"/>
+z
+
+            </RelativeLayout>
+
+
+
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</layout>

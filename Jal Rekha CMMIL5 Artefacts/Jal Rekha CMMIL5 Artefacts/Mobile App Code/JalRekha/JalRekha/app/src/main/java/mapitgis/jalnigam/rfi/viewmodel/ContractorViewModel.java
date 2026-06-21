@@ -1,0 +1,388 @@
+package mapitgis.jalnigam.rfi.viewmodel;
+
+import android.app.Application;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
+import android.text.TextUtils;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
+import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import mapitgis.jalnigam.rfi.helper.PrefManager;
+import mapitgis.jalnigam.room.dao.JalRekhaDao;
+import mapitgis.jalnigam.room.db.JalRekhaDB;
+import mapitgis.jalnigam.room.table.AnushravanStatusTable;
+import mapitgis.jalnigam.room.table.ApplicationTypeTable;
+import mapitgis.jalnigam.room.table.BlockTable;
+import mapitgis.jalnigam.room.table.ComponentTypeTable;
+import mapitgis.jalnigam.room.table.GramTable;
+import mapitgis.jalnigam.room.table.InspectionRequestTable;
+import mapitgis.jalnigam.room.table.LocationTable;
+import mapitgis.jalnigam.room.table.MediaTable;
+import mapitgis.jalnigam.room.table.PipeLineTable;
+import mapitgis.jalnigam.room.table.PointTable;
+import mapitgis.jalnigam.room.table.SopanOHT;
+import mapitgis.jalnigam.room.table.VillageTable;
+
+public class ContractorViewModel extends AndroidViewModel {
+
+    private JalRekhaDao jalRekhaDao;
+    private JalRekhaDB jalRekhaDB;
+
+    private LiveData<List<ComponentTypeTable>> componentList;
+    private LiveData<List<BlockTable>> blockList;
+
+    public List<String> pipeLineComponentTypeId = Arrays.asList("9", "10", "11", "12");//CWGM,CWPM,RWPM,DistributionPipe
+
+
+    PrefManager prefManager;
+
+
+    public ContractorViewModel(@NonNull Application application) {
+        super(application);
+        prefManager = new PrefManager(application);
+        jalRekhaDB = JalRekhaDB.getDatabase(application);
+        jalRekhaDao = jalRekhaDB.jalRekhaDao();
+        componentList = jalRekhaDao.getComponent();
+        blockList = jalRekhaDao.getBlock();
+    }
+
+    // TODO: Insert question
+    public void insertApplicationType(ApplicationTypeTable table) {
+        new InsertApplicationTypeTask(jalRekhaDao).execute(table);
+    }
+
+    private static class InsertApplicationTypeTask extends AsyncTask<ApplicationTypeTable, Void, Void> {
+
+        private JalRekhaDao jalRekhaDao;
+
+        public InsertApplicationTypeTask(JalRekhaDao jalRekhaDao) {
+            this.jalRekhaDao = jalRekhaDao;
+        }
+
+        @Override
+        protected Void doInBackground(ApplicationTypeTable... applicationTypeTables) {
+
+            jalRekhaDao.insertApplicationType(applicationTypeTables[0]);
+
+            return null;
+        }
+
+    }
+
+    public LiveData<List<ApplicationTypeTable>> getApplicationType() {
+        return jalRekhaDao.getApplicationType();
+    }
+
+    // TODO: 08-07-2024 : insert component*********************************************************
+    public void insertComponentType(ComponentTypeTable table) {
+        new InsertComponentTask(jalRekhaDao).execute(table);
+    }
+
+    private static class InsertComponentTask extends AsyncTask<ComponentTypeTable, Void, Void> {
+
+        private JalRekhaDao jalRekhaDao;
+
+        public InsertComponentTask(JalRekhaDao jalRekhaDao) {
+            this.jalRekhaDao = jalRekhaDao;
+        }
+
+        @Override
+        protected Void doInBackground(ComponentTypeTable... applicationTypeTables) {
+
+            jalRekhaDao.insertComponent(applicationTypeTables[0]);
+
+            return null;
+        }
+
+    }
+
+    public LiveData<List<ComponentTypeTable>> getComponentList() {
+        return componentList;
+    }
+
+    // TODO: 09-07-2024 : insert point **************************************************************
+
+    public void insertPoint(PointTable table) {
+        new InsertPointTask(jalRekhaDao).execute(table);
+    }
+
+    private static class InsertPointTask extends AsyncTask<PointTable, Void, Void> {
+
+        private JalRekhaDao jalRekhaDao;
+
+        public InsertPointTask(JalRekhaDao jalRekhaDao) {
+            this.jalRekhaDao = jalRekhaDao;
+        }
+
+        @Override
+        protected Void doInBackground(PointTable... pointTables) {
+
+            jalRekhaDao.insertPoint(pointTables[0]);
+
+            return null;
+        }
+
+    }
+
+    public LiveData<List<PointTable>> getPoint(String pointId) {
+        return jalRekhaDao.getPoint(pointId);
+    }
+
+
+    // TODO: 09-07-2024 : insert  location ******************************************************
+    public void insertLocation(LocationTable table) {
+        new InsertLocationTask(jalRekhaDao).execute(table);
+    }
+
+    private static class InsertLocationTask extends AsyncTask<LocationTable, Void, Void> {
+
+        private JalRekhaDao jalRekhaDao;
+
+        public InsertLocationTask(JalRekhaDao jalRekhaDao) {
+            this.jalRekhaDao = jalRekhaDao;
+        }
+
+        @Override
+        protected Void doInBackground(LocationTable... locationTables) {
+
+            jalRekhaDao.insertLocation(locationTables[0]);
+
+            return null;
+        }
+
+    }
+
+    public LiveData<List<BlockTable>> getBlock() {
+        return blockList;
+    }
+
+    public LiveData<List<GramTable>> getGramPList(String blockId) {
+        Log.e("tag", "BLOCK " + blockId);
+        return jalRekhaDao.getGramPanchayat(blockId);
+    }
+
+    public LiveData<List<VillageTable>> getVillage(String gramId) {
+        Log.e("tag", "village " + gramId);
+        return jalRekhaDao.getVillage(gramId);
+    }
+
+    // TODO: 11/11/24 : inserting and getting anushravan status
+    public void insertAnushravanStatus(List<AnushravanStatusTable>anushravanStatusTable){
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            jalRekhaDao.insertAnushravanStatus(anushravanStatusTable);
+        });
+    }
+
+    public LiveData<List<AnushravanStatusTable>> getAnushravanStatus(){
+        return jalRekhaDao.getAnushravanStatus();
+    }
+
+    // TODO: 09-07-2024 : insert inspection request
+    public void insertInspectionRequest(InspectionRequestTable table, List<String> images) {
+        new InsertInspectionTask(jalRekhaDao, images).execute(table);
+    }
+
+    private static class InsertInspectionTask extends AsyncTask<InspectionRequestTable, Void, Void> {
+
+        private JalRekhaDao jalRekhaDao;
+        private List<String> images;
+
+        public InsertInspectionTask(JalRekhaDao jalRekhaDao, List<String> images) {
+            this.jalRekhaDao = jalRekhaDao;
+            this.images = images;
+        }
+
+        @Override
+        protected Void doInBackground(InspectionRequestTable... locationTables) {
+
+            long insID = jalRekhaDao.insertInspectionRequest(locationTables[0]);
+
+            if (!images.isEmpty()) {
+                for (String image : images) {
+                    MediaTable mediaTable = new MediaTable();
+                    mediaTable.setRequestId(insID);
+                    mediaTable.setImage(imageToBase64(image));
+                    jalRekhaDao.insertMediaFile(mediaTable);
+                }
+            }
+            return null;
+        }
+
+        private byte[] imageToBase64(String filePath) {
+            Bitmap bm = BitmapFactory.decodeFile(filePath);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bm.compress(Bitmap.CompressFormat.JPEG, 50, baos); // bm is the bitmap object
+            byte[] byteArrayImage = baos.toByteArray();
+            Log.e("tag",""+byteArrayImage);
+            return byteArrayImage;
+            // return Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
+        }
+
+    }
+
+    // TODO: 10-07-2024 : insert all inspection request
+    public void insertInspectionAllRequest(List<InspectionRequestTable> table) {
+        new InsertInspectionAllTask(jalRekhaDao).execute(table);
+    }
+
+    private static class InsertInspectionAllTask extends AsyncTask<List<InspectionRequestTable>, Void, Void> {
+
+        private JalRekhaDao jalRekhaDao;
+
+        public InsertInspectionAllTask(JalRekhaDao jalRekhaDao) {
+            this.jalRekhaDao = jalRekhaDao;
+        }
+
+        @Override
+        protected Void doInBackground(List<InspectionRequestTable>... locationTables) {
+
+            jalRekhaDao.deleteInspectionByUploadStatus();
+            jalRekhaDao.insertAllInspectionRequest(locationTables[0]);
+
+            return null;
+        }
+
+    }
+
+
+    public LiveData<List<InspectionRequestTable>> getInspectionRequest(String savedBy,String saveById,
+                                                                       String revisitStatus) {
+
+        if(revisitStatus.isEmpty()){
+            return jalRekhaDao.getInspection(savedBy,saveById);
+        }else{
+            return jalRekhaDao.getReInspection(savedBy,saveById,revisitStatus);
+        }
+
+    }
+
+    public void deleteOrUpdateInspectionById(int id,boolean isDelete) {
+        class DeleteTask extends AsyncTask<Void, Void, Void> {
+            @Override
+            protected Void doInBackground(Void... voids) {
+
+                if(isDelete){
+                    jalRekhaDao.deleteInspectionById(id);
+                    jalRekhaDao.deleteMediaByInspectionId(id);
+                }else{
+                    jalRekhaDao.updateInspectionStatus(id,1);
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                //Toast.makeText(getApplication(), "Removed", Toast.LENGTH_LONG).show();
+            }
+        }
+
+        DeleteTask dt = new DeleteTask();
+        dt.execute();
+    }
+
+    // TODO: 10-07-2024 : get media image
+    public LiveData<List<MediaTable>> getMediaImage(long requestId) {
+        return jalRekhaDao.getMediaFile(requestId);
+    }
+
+    // TODO: 09-07-2024 : delete table data
+        public void deleteAllData() {
+        class DeleteTask extends AsyncTask<Void, Void, Void> {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                jalRekhaDao.deleteAllLocation();
+                jalRekhaDao.deleteAllComponent();
+                jalRekhaDao.deleteAllPoints();
+                jalRekhaDao.deleteAllApplicationType();
+                jalRekhaDao.deleteAllStatus();
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                //Toast.makeText(getApplication(), "Removed", Toast.LENGTH_LONG).show();
+            }
+        }
+
+        DeleteTask dt = new DeleteTask();
+        dt.execute();
+    }
+
+
+
+
+    /*****************Pipeline master changes*************/
+    public void insertPipeLineMaster(List<PipeLineTable> pipeLineMasterTable){
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            jalRekhaDao.deleteAllPipeLine();
+            jalRekhaDao.resetPipelineMasterAutoIncrement();
+            jalRekhaDao.insertPipeLine(pipeLineMasterTable);
+        });
+    }
+
+    /*****************sopan oht master changes*************/
+    public void insertSopanOhtMaster(List<SopanOHT> ohtList){
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            jalRekhaDao.deleteAllSopanOHT();
+            jalRekhaDao.resetSopanOHTMasterAutoIncrement();
+            jalRekhaDao.insertSopanOHT(ohtList);
+        });
+    }
+
+
+
+
+
+    public LiveData<List<String>> getComponentMBROHT(int componentId) {
+        return jalRekhaDao.getPipelineOHTMBR(prefManager.getSchemeId(), componentId);
+    }
+
+    public LiveData<List<SopanOHT>> getSopanOhtList(String ohtType) {
+        return jalRekhaDao.getSopanOHTList(ohtType);
+    }
+
+
+
+    public LiveData<List<PipeLineTable>> getMBROHTPineLines(int componentId, String mbroht) {
+        if(componentId==10 || componentId==11){
+            //CWPM & RWPM
+            return jalRekhaDao.getPipelineListFOR_CWPM_RWPM(prefManager.getSchemeId(), componentId);
+        }else{
+            //CWGM,DISTRIBUTION PIPE
+            return jalRekhaDao.getPipelineList(prefManager.getSchemeId(), componentId,mbroht);
+        }
+    }
+
+
+
+    public LiveData<PipeLineTable> getPineLineDetail(String schId,int componentId, String mbroht,String pipeNo) {
+        if(componentId==10 || componentId==11){
+            //CWPM & RWPM
+            return jalRekhaDao.getPipelineDetailFOR_CWPM_RWPM(schId, componentId,pipeNo);
+        }else{
+            //CWGM,DISTRIBUTION PIPE
+            return jalRekhaDao.getPipelineDetail(schId, componentId,mbroht,pipeNo);
+        }
+    }
+
+
+}

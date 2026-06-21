@@ -1,0 +1,33 @@
+package mapitgis.jalnigam.nirmal.database.table
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.google.gson.annotations.SerializedName
+
+
+@Entity(tableName = "nirmal_assigned_survey")
+data class NirmalAssignedSurvey(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @SerializedName("active_by") val activeBy: String,
+    @SerializedName("active_date") val activeDate: String,
+    @SerializedName("alotement_type") val allotmentType: String,
+    @SerializedName("alotement_type_name") val allotmentTypeName: String,
+    @SerializedName("beneficiary") val beneficiary: String?,
+    @SerializedName("bid") val bid: String,
+    @SerializedName("esr_name") val esrName: String,
+    @SerializedName("esr_oht_code") val esrOhtCode: String,
+    @SerializedName("inactive_by") val inactiveBy: String?,
+    @SerializedName("inactive_date") val inactiveDate: String?,
+    @SerializedName("is_active") val isActive: String,
+    @SerializedName("maping_id") val assignId: String,
+    @SerializedName("scheme_id") val schemeId: String,
+    @SerializedName("scheme_name") val schemeName: String,
+    @SerializedName("user_id") val userId: String,
+    @SerializedName("user_name") val userName: String,
+    @SerializedName("user_type") val userType: String,
+    @SerializedName("wtp_id") val wtpId: String,
+    //@SerializedName("wtp_id") val wtpId: String, //need to add
+
+    @SerializedName("asset_latitude") val assetLatitude: String,
+    @SerializedName("asset_longitude") val assetLongitude: String,
+)

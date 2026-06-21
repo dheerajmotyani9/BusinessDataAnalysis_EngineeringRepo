@@ -1,0 +1,26 @@
+package mapitgis.jalnigam.nirmal.util
+
+import android.text.InputFilter
+import android.text.Spanned
+
+class DecimalInputFilter : InputFilter {
+    override fun filter(
+        source: CharSequence?,
+        start: Int,
+        end: Int,
+        dest: Spanned?,
+        dstart: Int,
+        dend: Int
+    ): CharSequence? {
+        val newText = dest?.subSequence(0, dstart).toString() +
+                source.toString() +
+                dest?.subSequence(dend, dest.length).toString()
+
+        // Regex: Allows up to 2 digits before and 2 digits after decimal
+        return if (newText.matches(Regex("^\\d{0,2}(\\.\\d{0,3})?$"))) {
+            null // Accept input
+        } else {
+            "" // Reject input
+        }
+    }
+}

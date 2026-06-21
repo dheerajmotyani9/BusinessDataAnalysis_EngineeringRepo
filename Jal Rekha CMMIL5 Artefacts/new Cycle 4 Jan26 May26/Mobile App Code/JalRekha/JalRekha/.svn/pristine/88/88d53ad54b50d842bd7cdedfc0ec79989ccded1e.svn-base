@@ -1,0 +1,240 @@
+package mapitgis.jalnigam;
+
+import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.InputType;
+import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
+import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
+
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import mapitgis.jalnigam.core.API;
+import mapitgis.jalnigam.core.ApiCaller;
+import mapitgis.jalnigam.core.Data;
+import mapitgis.jalnigam.core.Login;
+import mapitgis.jalnigam.core.Module;
+import mapitgis.jalnigam.core.SpinnerItem;
+import mapitgis.jalnigam.core.SqLite;
+import mapitgis.jalnigam.core.Utility;
+import mapitgis.jalnigam.databinding.ActivityLoginBinding;
+import mapitgis.jalnigam.nirmal.collection.SessionManager;
+import mapitgis.jalnigam.rfi.helper.PrefManager;
+import mapitgis.jalnigam.rfi.helper.ProgressHelper;
+import mapitgis.jalnigam.rfi.model.SyncLogin;
+import mapitgis.jalnigam.rfi.model.dhara.DharaESR;
+import mapitgis.jalnigam.network.ApiClient;
+import mapitgis.jalnigam.network.ApiInterface;
+import mapitgis.jalnigam.room.table.AnushravanStatusTable;
+import mapitgis.jalnigam.room.table.ApplicationTypeTable;
+import mapitgis.jalnigam.room.table.ComponentTypeTable;
+import mapitgis.jalnigam.room.table.LocationTable;
+import mapitgis.jalnigam.room.table.PointTable;
+import mapitgis.jalnigam.rfi.viewmodel.ContractorViewModel;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class LoginActivity extends BaseActivity {
+    ActivityLoginBinding binding;
+    private ProgressHelper progressHelper;
+    private PrefManager prefManager;
+    private ApiInterface apiInterface;
+    private ContractorViewModel contractorViewModel;
+
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        binding = ActivityLoginBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        progressHelper = new ProgressHelper(this);
+        prefManager = new PrefManager(this);
+        apiInterface = ApiClient.getClient(this).create(ApiInterface.class);
+        contractorViewModel = new ViewModelProvider(this).get(ContractorViewModel.class);
+
+
+        binding.textViewVersion.setText(String.format("%s %s", getString(R.string.app_name), String.format("v%s", BuildConfig.VERSION_NAME)));
+
+        binding.buttonSubmit.setOnClickListener(view -> login());
+
+        binding.radioGroup.setOnCheckedChangeListener((radioGroup, i) -> {
+            if (i == R.id.radio1) {
+                binding.textViewForgot.setVisibility(View.VISIBLE);
+                binding.textViewNewRegister.setVisibility(View.VISIBLE);
+                binding.textViewUsername.setText(R.string.mobile_number);
+                binding.editTextUsername.setHint(R.string.mobile_number);
+                binding.editTextUsername.setFilters(new InputFilter[] {new InputFilter.LengthFilter(10)});
+                binding.editTextUsername.setInputType(InputType.TYPE_CLASS_NUMBER);
+            } else if (i == R.id.radio2) {
+                binding.textViewForgot.setVisibility(View.GONE);
+                binding.textViewNewRegister.setVisibility(View.INVISIBLE);
+                binding.textViewUsername.setText(R.string.username);
+                binding.editTextUsername.setHint(R.string.username);
+                binding.editTextUsername.setFilters(new InputFilter[] {new InputFilter.LengthFilter(100)});
+                binding.editTextUsername.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            } else {
+                binding.textViewForgot.setVisibility(View.GONE);
+                binding.textViewNewRegister.setVisibility(View.INVISIBLE);
+                binding.textViewUsername.setText(R.string.email_id);
+                binding.editTextUsername.setHint(R.string.email_id);
+                binding.editTextUsername.setFilters(new InputFilter[] {new InputFilter.LengthFilter(100)});
+                binding.editTextUsername.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            }
+        });
+
+        binding.imageViewPassVH.setOnClickListener(v -> {
+            if (!isPasswordVisible) {
+                binding.editTextPassword.setTransformationMethod(null);
+                binding.imageViewPassVH.setImageResource(R.drawable.outline_visibility_off_black_48dp);
+                isPasswordVisible = true;
+            } else {
+                binding.editTextPassword.setTransformationMethod(new PasswordTransformationMethod());
+                binding.imageViewPassVH.setImageResource(R.drawable.outline_visibility_black_48dp);
+                isPasswordVisible = false;
+            }
+            binding.editTextPassword.setSelection(binding.editTextPassword.length());
+        });
+
+        binding.textViewForgot.setOnClickListener(view -> Utility.open(this, ForgotActivity.class));
+        binding.textViewNewRegister.setOnClickListener(view -> Utility.open(this, RegisterActivity.class));
+
+
+
+        binding.textViewBackup.setOnLongClickListener(view1 -> {
+            Utility.bkp(this);
+            return true;
+        });
+    }
+
+    boolean isPasswordVisible;
+
+
+    public void login() {
+        String username = binding.editTextUsername.getText().toString().trim();
+        String password = binding.editTextPassword.getText().toString().trim();
+
+        if (username.isEmpty()) {
+            if (binding.radio1.isChecked()) {
+                Utility.show(this, Utility.check(this, R.string.mobile_number));
+            } else if (binding.radio2.isChecked()) {
+                Utility.show(this, Utility.check(this, R.string.username));
+            } else {
+                Utility.show(this, Utility.check(this, R.string.email_id));
+            }
+            return;
+        }
+
+        if (password.isEmpty()) {
+            Utility.show(this, Utility.check(this, R.string.password));
+            return;
+        }
+
+        if (username.equals("1234567890") && password.equals("123")) {
+            SqLite.instance(this).login(new Login(0, "Demo User", "demo@gmail.com", username, "", "", 7, "", "", ""));//, Utility.getDeviceID(this)
+//            SqLite.instance(this).login(new Login(1, "Demo User", "demo@gmail.com", mobile, "", "", "", "", ""));//, Utility.getDeviceID(this)
+            Utility.goFirst(this, true);
+            return;
+        }
+
+        Map<String, String> body = new HashMap<>();
+
+        if (binding.radio3.isChecked()) {
+            body.put("user_id", username);
+            body.put("password", password);
+            contractorLogin(body);
+        } else {
+            Data data = new Data();
+            data.put("username", username);
+            data.put("password", password);
+            data.put("source", binding.radio2.isChecked() ? "SARTHAK" : "APP");
+            new ApiCaller(this, (response, key) -> {
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    if (jsonObject.getBoolean(Utility.SUCCESS)) {
+                        JSONObject jsonObject1 = jsonObject.getJSONObject(Utility.DATA);
+                        SqLite.instance(this).login(new Login(jsonObject1.getLong("user_id"), jsonObject1.getString("name"), jsonObject1.getString("email_id"), jsonObject1.getString("mobile"), jsonObject1.getString("district"), jsonObject1.getString("designation"), jsonObject1.getInt("role_id"), jsonObject1.getString("role"), jsonObject1.getString("token"), jsonObject1.getString("module")));//, Utility.getDeviceID(this)
+                        Utility.goFirst(this, true);
+                    } else {
+                        Utility.show(this, jsonObject.getString(Utility.MESSAGE));//jsonObject.getString(Utility.MESSAGE)
+                    }
+                } catch (Exception e) {
+                    Utility.show(this, e);
+                    finish();
+                }
+            }, 1, data.toString(), getString(R.string.please_wait)).start(API.GetDeviceUserForLogin);
+        }
+    }
+
+    // TODO: 12-07-2024 : contractor login for Anushravan and Dhara
+    private void contractorLogin(Map<String, String> body) {
+        progressHelper.showProgress("Login....");
+
+        Call<mapitgis.jalnigam.rfi.model.Login> call = apiInterface.login(body);
+
+        call.enqueue(new Callback<mapitgis.jalnigam.rfi.model.Login>() {
+            @Override
+            public void onResponse(@NonNull Call<mapitgis.jalnigam.rfi.model.Login> call, @NonNull Response<mapitgis.jalnigam.rfi.model.Login> response) {
+                if (response.body() != null && response.body().isSuccess()) {
+                    mapitgis.jalnigam.rfi.model.Login.LoginData data = response.body().getData();
+
+                    prefManager.setSchemeId(data.getSchemeId());
+                    prefManager.setSchemeName(data.getSchemeName());
+//                    prefManager.setSqcId(data.getSqcId());
+                    prefManager.setSqcName(data.getSqcName());
+                    prefManager.setTpiaName(data.getTpiaName());
+                    prefManager.setTpiaId(data.getTpiaUserId());
+                    prefManager.setPiuId(data.getPiuId());
+                    prefManager.setPiuName(data.getPiuName());
+
+//                    prefManager.setUserName(data.getUsername());
+//                    prefManager.setUserId(data.getUserId());
+//                    prefManager.setToken1(data.getToken());
+//                    prefManager.setUserEmail(data.getEmailId());
+//                    prefManager.setDesignation(data.getDesignation());
+//                    prefManager.setUserMobile(data.getMobileNo());
+                    prefManager.setSourceType(data.getSourceType());
+//                    prefManager.setIsDharaAccess(data.getDesignationId());
+//                    prefManager.setUserType("contractor");
+
+                    if (data.getRoleId() == 10) {
+                        Login login = new Login(Long.parseLong(data.getUserId()), data.getUsername(), data.getEmailId(), data.getMobileNo(), "", data.getDesignation(), data.getRoleId(), "Contractor", data.getToken(), Module.NIRMAL.code);
+                        //getRoleId "10" means Dhara user.
+                        SessionManager sessionManager = new SessionManager(LoginActivity.this);
+                        sessionManager.saveNirmalContractorDetail(data.getUsername(), data.getSchemeName(), data.getSchemeId(), data.getPiuName());
+                        SqLite.instance(LoginActivity.this).login(login);
+                        Utility.goFirst(LoginActivity.this, true);
+                    } else if (data.getRoleId() == 9) {
+                        Login login = new Login(Long.parseLong(data.getUserId()), data.getUsername(), data.getEmailId(), data.getMobileNo(), "", data.getDesignation(), data.getRoleId(), "Contractor", data.getToken(), Module.ANUSHRAVAN.code);
+                        //getRoleId "9" means RFI user.
+//                        getSyncData(login);
+                        SqLite.instance(LoginActivity.this).login(login);
+                        Utility.goFirst(LoginActivity.this, true);
+                    } else {
+                        Utility.show(LoginActivity.this,"Something is wrong in role.");
+                    }
+                } else {
+                    progressHelper.message("Please check username or password");//response.body().getMessage()
+                    progressHelper.dismissProgress();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<mapitgis.jalnigam.rfi.model.Login> call, @NonNull Throwable t) {
+                progressHelper.message("Something went wrong! try again.");
+                progressHelper.dismissProgress();
+            }
+        });
+    }
+
+}

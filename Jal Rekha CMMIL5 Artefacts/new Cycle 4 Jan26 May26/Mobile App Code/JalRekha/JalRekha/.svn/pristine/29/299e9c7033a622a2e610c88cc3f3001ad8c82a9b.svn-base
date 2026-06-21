@@ -1,0 +1,109 @@
+package mapitgis.jalnigam.nirmal.screens.wqm_list
+
+import android.app.Application
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.map
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import mapitgis.jalnigam.nirmal.base.NirmalBaseViewModel
+import mapitgis.jalnigam.nirmal.collection.WaterPointType
+import mapitgis.jalnigam.nirmal.database.dao.CombineSurveyTransaction
+import mapitgis.jalnigam.nirmal.database.table.NirmalWQMEntity
+import mapitgis.jalnigam.nirmal.screens.beneficiary.BeneficiaryListActivity
+import mapitgis.jalnigam.nirmal.screens.wqm_add.WQMFormActivity
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+
+class WQMListVM(application: Application) : NirmalBaseViewModel(application){
+
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+    private val _selectedDate = MutableLiveData(dateFormat.format(Date()))
+    val selectedDate: LiveData<String> = _selectedDate
+    val isToday: LiveData<Boolean> = _selectedDate.map { selected -> selected == dateFormat.format(Date()) }
+
+    private val _filterParams = MutableLiveData(
+        listOf(WaterPointType.WTP_INLET.id,WaterPointType.WTP_OUTLET.id,WaterPointType.BULK_METER.id,WaterPointType.OHT_ESR.id)
+    )
+
+
+    val surveyTransList: LiveData<List<CombineSurveyTransaction>> = MediatorLiveData<List<CombineSurveyTransaction>>().apply {
+        var currentSource: LiveData<List<CombineSurveyTransaction>>? = null
+
+        fun update() {
+            val filters = _filterParams.value ?: emptyList()
+            val date = _selectedDate.value ?: return
+
+            val newSource = nirmalRepo.combineSurveyTrans(filters, date)
+            currentSource?.let { removeSource(it) }
+            currentSource = newSource
+            addSource(newSource) { value = it }
+        }
+
+        addSource(_filterParams) { update() }
+        addSource(_selectedDate) { update() }
+    }
+
+
+
+    fun deleteWQMById(id: Int) {
+        viewModelScope.launch {
+            nirmalRepo.deleteWQMById(id)
+        }
+    }
+
+    fun filterList(filter: List<Int>){
+        _filterParams.value = filter
+    }
+
+    fun setSelectedDate(date: String) {
+        _selectedDate.value = date
+    }
+
+    fun isFilterSelected(id: Int):Boolean{
+        return _filterParams.value?.contains(id) ?: false
+    }
+
+    fun uploadWQM(nirmalWQMEntity: NirmalWQMEntity, onResult: (Boolean) -> Unit) {
+        if(isLocationValid()){
+            viewModelScope.launch(Dispatchers.IO) {
+                val pair = nirmalRepo.uploadWQMForm(nirmalWQMEntity,geoLocation.value!!)
+                withContext(Dispatchers.Main) {
+                    _toastMessage.value = pair.component2()
+                    onResult(pair.component1())
+                }
+            }
+        }
+    }
+
+
+    fun onAddEventClick(surveyTran: CombineSurveyTransaction){
+        WQMFormActivity.pushActivity(context, surveyTran)
+    }
+
+
+    fun onManageBeneficiaryClick(surveyTran: CombineSurveyTransaction){
+        BeneficiaryListActivity.pushActivity(context, surveyTran)
+    }
+
+
+
+    fun goToPreviousDay() = changeSelectedDateBy(-1)
+
+    fun goToNextDay() = changeSelectedDateBy(1)
+
+    private fun changeSelectedDateBy(dayOffset: Int) {
+        _selectedDate.value?.let {
+            val calendar = Calendar.getInstance()
+            calendar.time = dateFormat.parse(it)!!
+            calendar.add(Calendar.DATE, dayOffset)
+            _selectedDate.value = dateFormat.format(calendar.time)
+        }
+    }
+}
